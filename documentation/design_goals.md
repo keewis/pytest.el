@@ -37,7 +37,7 @@ Shortcuts
 `x` disselect all
 `C-/` undo one operation
 `RET` view the selected group / highlighted test case
-`F5` run selected group
+`F5` run selected group / highlighted test case
 
 After running, the group stays selected.
 
@@ -53,15 +53,17 @@ stay open, thus allowing to examine several runs at once.
 Shortcuts
 ---------
 `RET` examine test case (open report buffer)
-`r` rename group
+`n` rename group
 `q` close group buffer and delete test data
 `a` interactively add one test case
 `d`, `DEL` remove one test case
+`R` look at the raw output
+
 
 Reports
 =======
 Mode Name: pytest-report-mode
-Buffer Name: `*pytest: <project> — <fqn of test>*`.
+Buffer Name: `*pytest-report: <project> — <fqn of test>*`.
 
 Pressing RET on any of the symbols opens this buffer (`q` closes)
 where information on errors, warnings and output is displayed (even if
@@ -74,6 +76,14 @@ Shortcuts
 `q` close this buffer (information is not deleted)
 `F5` (re)run this test (variation)
 `TAB` collapse the selected report
+
+Raw Output
+==========
+Mode: Shell
+Buffer Name: `*pytest-output: <project> — <group name>*`
+
+This is where the output of the run is stored. Users normally don't
+have to, but sometimes it might be better to have a look at it.
 
 
 Global shortcuts
