@@ -35,7 +35,8 @@ If DIR is non-nil, run pytest in it."
         (dir nil)
         (prepared-selector (pytest--split-selector file)))
     (setq name (pytest--buffer-name 'pytest-raw-mode prepared-selector))
-    (pytest--run-raw args dir name)))
+    (if (and (s-starts-with-p "test_") (s-ends-with-p ".py"))
+        (pytest--run-raw args dir name))))
 
 (defun pytest-run-current-file ()
   "Run the currently opened buffer."
