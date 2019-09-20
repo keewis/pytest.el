@@ -30,6 +30,10 @@
   (read-only-mode)
   (setq quit-restore "bury"))
 
+(defun pytest--test-file-p (path)
+  "Is PATH a pytest test file?"
+  (let ((name (file-name-nondirectory path)))
+    (and (s-starts-with-p "test_" name) (s-ends-with-p ".py" name))))
 
 (defun pytest--run-raw (&optional args dir buffer-name)
   "Run pytest in a raw buffer named BUFFER-NAME.
@@ -56,7 +60,7 @@ If DIR is non-nil, run pytest in it."
         (dir nil)
         (prepared-selector (pytest--split-selector file)))
     (setq name (pytest--buffer-name 'pytest-raw-mode prepared-selector))
-    (if (and (s-starts-with-p "test_") (s-ends-with-p ".py"))
+    (if (pytest--test-file-p file)
         (pytest--run-raw args dir name))))
 
 (defun pytest-run-current-file ()
