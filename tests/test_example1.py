@@ -1,6 +1,8 @@
 import warnings
 import pytest
 
+from example import example
+
 def warn():
     warnings.warn("warning emitted", UserWarning)
 
@@ -48,4 +50,4 @@ def variable(request):
     return request.param
 
 def test_variations(variable):
-    assert variable % 2 == 0
+    assert example(variable)
