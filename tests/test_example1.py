@@ -22,10 +22,6 @@ def test_fail():
 def test_error(failing):
     warn()
 
-@pytest.mark.skip
-def test_skip():
-    warn()
-
 @pytest.mark.xfail
 def test_xfail():
     warn()
@@ -36,6 +32,9 @@ def test_xpass():
     warn()
     assert True
 
+@pytest.mark.skip
+def test_skip():
+    warn()
 
 @pytest.fixture(params=[
     pytest.param(0),
