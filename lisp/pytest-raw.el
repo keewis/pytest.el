@@ -5,10 +5,31 @@
 (require 'pytest-buffers)
 (require 'pytest-process)
 
-(define-minor-mode pytest-raw-mode "PytestRaw"
-  "Minor mode for viewing raw pytest output."
+(defun pytest-bury-buffer ()
+  "Kill or bury the currently active window."
+  (interactive)
+  (quit-restore-window))
+
+(defvar pytest-raw-mode-map
+  (let ((map (make-sparse-keymap)))
+    (define-key map "q" #'pytest-bury-buffer)
+    map)
+  "Keymap used in `pytest-raw-mode'.")
+
+(define-minor-mode pytest-raw-mode
+  "Minor mode for viewing raw pytest output.
+
+\\{pytest-raw-mode-map}"
+  :lighter "PytestRaw"
   :group 'pytest-modes
-  (read-only-mode))
+  :keymap pytest-raw-mode-map
+  (buffer-disable-undo)
+  (setq-local line-move-visual t)
+  (setq-local font-lock-syntactic-face-function #'ignore)
+  (setq show-trailing-whitespace nil)
+  (read-only-mode)
+  (setq quit-restore "bury"))
+
 
 (defun pytest--run-raw (&optional args dir buffer-name)
   "Run pytest in a raw buffer named BUFFER-NAME.
