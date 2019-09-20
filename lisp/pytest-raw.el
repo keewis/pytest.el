@@ -3,6 +3,7 @@
 ;;; These interactive functions should be used to bind keys in python-mode
 ;;; Code:
 (require 'pytest-buffers)
+(require 'pytest-info)
 (require 'pytest-process)
 
 (defun pytest-bury-buffer ()
@@ -35,6 +36,25 @@
   (let ((name (file-name-nondirectory path)))
     (and (s-starts-with-p "test_" name) (s-ends-with-p ".py" name))))
 
+(defun pytest--test-components-p (components)
+  "Is every entry in COMPONENTS a test class?"
+  (every (lambda (x) (s-starts-with-p "Test" x)) components))
+
+(defun pytest--test-p (selector)
+  "Is SELECTOR a pytest test?"
+  (let ((file-path (car selector))
+        (full-name (cdr selector))
+        components
+        name)
+    (setq components (butlast full-name))
+    (setq name (car (last full-name)))
+    (setq is-test-file (pytest--test-file-p file-path))
+    (setq is-test-components (or (not components)
+                                 (pytest--test-components-p components)))
+    (setq is-test-name (or (not name)
+                           (s-starts-with-p "test_" name)))
+    (and is-test-file is-test-components is-test-name)))
+
 (defun pytest--run-raw (&optional args dir buffer-name)
   "Run pytest in a raw buffer named BUFFER-NAME.
 
@@ -63,10 +83,27 @@ If DIR is non-nil, run pytest in it."
     (if (pytest--test-file-p file)
         (pytest--run-raw args dir name))))
 
+(defun pytest-run-selector (selector)
+  "Run the single test SELECTOR."
+  (let ((prepared-selector (pytest--normalize-selector selector))
+        (dir nil)
+        args
+        name)
+    (setq args (list "--color=yes" (pytest--join-selector prepared-selector)))
+    (setq name (pytest--buffer-name 'pytest-raw-mode (list prepared-selector)))
+    (if (pytest--test-p prepared-selector)
+        (pytest--run-raw args dir name))))
+
 (defun pytest-run-current-file ()
   "Run the currently opened buffer."
   (interactive)
   (pytest-run-file (buffer-file-name)))
+
+(defun pytest-run-current-test ()
+  "Run the test at point."
+  (interactive)
+  (let ((selector (pytest-info-current-pos)))
+    (pytest-run-selector selector)))
 
 (provide 'pytest-raw)
 ;;; pytest-raw.el ends here
