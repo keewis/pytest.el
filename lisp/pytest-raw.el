@@ -16,6 +16,7 @@
 (defvar pytest-raw-mode-map
   (let ((map (make-sparse-keymap)))
     (define-key map "q" #'pytest-bury-buffer)
+    (define-key map "r" #'pytest-raw-rerun)
     map)
   "Keymap used in `pytest-raw-mode'.")
 
@@ -105,6 +106,16 @@ If DIR is non-nil, run pytest in it."
     (if (pytest--test-p prepared-selector)
         (pytest--run-raw args selectors dir name))))
 
+(defun pytest-run-selectors (selectors)
+  "Run SELECTORS."
+  (let ((prepared-selectors (pytest--normalize-selectors selectors))
+        (dir nil)
+        (args (list "--color=yes"))
+        name)
+    (setq name (pytest--buffer-name 'pytest-raw-mode prepared-selectors))
+    (if (every 'pytest--test-p prepared-selectors)
+        (pytest--run-raw args prepared-selectors dir name))))
+
 (defun pytest-run-current-file ()
   "Run the currently opened buffer."
   (interactive)
@@ -115,6 +126,13 @@ If DIR is non-nil, run pytest in it."
   (interactive)
   (let ((selector (pytest-info-current-pos)))
     (pytest-run-selector selector)))
+
+(defun pytest-raw-rerun ()
+  "Rerun the selectors in a raw buffer."
+  (interactive)
+  (let ((selectors (buffer-local-value 'called-selectors (current-buffer))))
+    (if selectors
+        (pytest-run-selectors selectors))))
 
 (provide 'pytest-raw)
 ;;; pytest-raw.el ends here
