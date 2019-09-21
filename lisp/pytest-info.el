@@ -22,7 +22,6 @@
   "Convert INFO to a selector."
   (let ((file-path (car info))
         (name (nth 1 info)))
-    (message "path: %s, info: %s" file-path name)
     (cons file-path (s-split "\\." name))))
 
 (defun pytest-info-current-pos ()
