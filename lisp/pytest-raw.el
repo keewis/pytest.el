@@ -2,6 +2,8 @@
 ;;; Commentary:
 ;;; These interactive functions should be used to bind keys in python-mode
 ;;; Code:
+(require 'cl)
+
 (require 'pytest-buffers)
 (require 'pytest-info)
 (require 'pytest-process)
@@ -55,44 +57,53 @@
                            (s-starts-with-p "test_" name)))
     (and is-test-file is-test-components is-test-name)))
 
-(defun pytest--run-raw (&optional args dir buffer-name)
+(defun pytest--run-raw (&optional args selectors dir buffer-name)
   "Run pytest in a raw buffer named BUFFER-NAME.
 
+If SELECTORS is non-nil, only run SELECTORS.
 If ARGS is non-nil, pass them to pytest.
 If DIR is non-nil, run pytest in it."
-  (let ((output-buffer (pytest--buffer-by-name buffer-name)))
+  (let ((selectors (pytest--normalize-selectors selectors))
+        (args (-concat args (pytest--join-selectors selectors)))
+        (output-buffer (pytest--buffer-by-name buffer-name)))
     (pytest--run args dir output-buffer)
     (with-current-buffer output-buffer
+      (setq-local called-selectors selectors)
       (pytest-raw-mode))))
 
 (defun pytest-run-all ()
   "Run the whole test suite."
   (interactive)
   (let ((args '("--color=yes"))
+        (selectors nil)
         (dir nil)
         (name (pytest--buffer-name 'pytest-raw-mode)))
-    (pytest--run-raw args dir name)))
+    (pytest--run-raw args selectors dir name)))
 
 (defun pytest-run-file (file)
   "Run the single test FILE."
   (interactive "fRun file: ")
-  (let ((args (list "--color=yes" file))
+  (let ((args (list "--color=yes"))
         (dir nil)
-        (prepared-selector (pytest--split-selector file)))
+        (prepared-selector (pytest--split-selector file))
+        selectors
+        name)
     (setq name (pytest--buffer-name 'pytest-raw-mode prepared-selector))
+    (setq selectors (list prepared-selector))
     (if (pytest--test-file-p file)
-        (pytest--run-raw args dir name))))
+        (pytest--run-raw args selectors dir name))))
 
 (defun pytest-run-selector (selector)
   "Run the single test SELECTOR."
   (let ((prepared-selector (pytest--normalize-selector selector))
         (dir nil)
-        args
+        (args (list "--color=yes"))
+        selectors
         name)
-    (setq args (list "--color=yes" (pytest--join-selector prepared-selector)))
     (setq name (pytest--buffer-name 'pytest-raw-mode (list prepared-selector)))
+    (setq selectors (list prepared-selector))
     (if (pytest--test-p prepared-selector)
-        (pytest--run-raw args dir name))))
+        (pytest--run-raw args selectors dir name))))
 
 (defun pytest-run-current-file ()
   "Run the currently opened buffer."
