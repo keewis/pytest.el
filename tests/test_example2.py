@@ -2,7 +2,7 @@ import pytest
 
 
 def test_case():
-    assert False
+    raise ValueError("always fails")
 
 class TestGroup:
     def test_pass(self):
