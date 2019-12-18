@@ -55,7 +55,8 @@
     (setq is-test-components (or (not components)
                                  (pytest--test-components-p components)))
     (setq is-test-name (or (not name)
-                           (s-starts-with-p "test_" name)))
+                           (s-starts-with-p "test_" name)
+                           (s-starts-with-p "Test" name)))
     (and is-test-file is-test-components is-test-name)))
 
 (defun pytest--run-raw (&optional args selectors dir buffer-name)
