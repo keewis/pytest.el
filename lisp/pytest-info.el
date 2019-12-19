@@ -30,5 +30,10 @@
     (setq selector (pytest-info--as-selector info))
     selector))
 
+(defun pytest-info-current-test ()
+  "Get a selector for the current test."
+  (interactive)
+  (let (selector (pytest-info--current-selector))
+    selector))
 (provide 'pytest-info)
 ;;; pytest-info.el ends here
