@@ -24,8 +24,8 @@
         (name (nth 1 info)))
     (cons file-path (s-split "\\." name))))
 
-(defun pytest-info-current-pos ()
-  "Get a selector for the current test."
+(defun pytest-info--current-selector ()
+  "Get a selector for the current position."
   (let ((info (pytest-info--current-pos)) selector)
     (setq selector (pytest-info--as-selector info))
     selector))
