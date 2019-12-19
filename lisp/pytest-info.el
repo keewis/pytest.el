@@ -32,8 +32,25 @@
 
 (defun pytest-info-current-test ()
   "Get a selector for the current test."
-  (interactive)
-  (let (selector (pytest-info--current-selector))
+  (let ((selector (pytest-info--current-selector)))
     selector))
+
+(defun pytest-info--as-group (selector)
+  "Get the test group of SELECTOR or nil."
+  (let ((file-path (car selector)) (components (cdr selector)) group-selector)
+    (message "raw selector: %s" selector)
+    (message "components: %s" components)
+    selector))
+
+(defun pytest-info-current-group ()
+  "Get a selector for the current test group."
+  (interactive)
+  (let (selector group-selector)
+    (setq selector (pytest-info--current-selector))
+    (message "selector: %s" selector)
+    (setq group-selector (pytest-info--as-group selector))
+    (message "current group: %s" group-selector)
+    group-selector))
+
 (provide 'pytest-info)
 ;;; pytest-info.el ends here
