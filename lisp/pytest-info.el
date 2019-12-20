@@ -37,19 +37,19 @@
 
 (defun pytest-info--as-group (selector)
   "Get the test group of SELECTOR or nil."
-  (let ((file-path (car selector)) (components (cdr selector)) group-selector)
-    (message "raw selector: %s" selector)
-    (message "components: %s" components)
-    selector))
+  (let ((file-path (car selector)) (components (cdr selector)) group-components group-selector)
+    (setq group-components (loop for elem in components while (s-starts-with-p "Test" elem) collect elem))
+    (setq group-selector (if (> (length group-components) 0)
+                             (cons file-path group-components)
+                           nil))
+    group-selector))
 
 (defun pytest-info-current-group ()
   "Get a selector for the current test group."
   (interactive)
   (let (selector group-selector)
     (setq selector (pytest-info--current-selector))
-    (message "selector: %s" selector)
     (setq group-selector (pytest-info--as-group selector))
-    (message "current group: %s" group-selector)
     group-selector))
 
 (provide 'pytest-info)
