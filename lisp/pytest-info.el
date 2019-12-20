@@ -46,7 +46,6 @@
 
 (defun pytest-info-current-group ()
   "Get a selector for the current test group."
-  (interactive)
   (let (selector group-selector)
     (setq selector (pytest-info--current-selector))
     (setq group-selector (pytest-info--as-group selector))
