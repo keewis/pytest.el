@@ -24,11 +24,32 @@
         (name (nth 1 info)))
     (cons file-path (s-split "\\." name))))
 
-(defun pytest-info-current-pos ()
-  "Get a selector for the current test."
+(defun pytest-info--current-selector ()
+  "Get a selector for the current position."
   (let ((info (pytest-info--current-pos)) selector)
     (setq selector (pytest-info--as-selector info))
     selector))
+
+(defun pytest-info-current-test ()
+  "Get a selector for the current test."
+  (let ((selector (pytest-info--current-selector)))
+    selector))
+
+(defun pytest-info--as-group (selector)
+  "Get the test group of SELECTOR or nil."
+  (let ((file-path (car selector)) (components (cdr selector)) group-components group-selector)
+    (setq group-components (loop for elem in components while (s-starts-with-p "Test" elem) collect elem))
+    (setq group-selector (if (> (length group-components) 0)
+                             (cons file-path group-components)
+                           nil))
+    group-selector))
+
+(defun pytest-info-current-group ()
+  "Get a selector for the current test group."
+  (let (selector group-selector)
+    (setq selector (pytest-info--current-selector))
+    (setq group-selector (pytest-info--as-group selector))
+    group-selector))
 
 (provide 'pytest-info)
 ;;; pytest-info.el ends here

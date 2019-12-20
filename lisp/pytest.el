@@ -34,7 +34,8 @@
   "Set up pytest keybindings in `python-mode'."
   (define-key python-mode-map (kbd "<f5>") 'pytest-run-current-file)
   (define-key python-mode-map (kbd "<S-f5>") 'pytest-run-current-test)
-  (define-key python-mode-map (kbd "<C-f5>") 'pytest-run-all))
+  (define-key python-mode-map (kbd "<C-f5") 'pytest-run-current-group)
+  (define-key python-mode-map (kbd "<M-f5>") 'pytest-run-all))
 (add-hook 'python-mode-hook 'setup-pytest-keybindings)
 
 (require 'projectile)
