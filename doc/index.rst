@@ -20,3 +20,5 @@ Default keyboard bindings:
 .. toctree::
    :maxdepth: 2
    :caption: Contents:
+
+   keybindings
