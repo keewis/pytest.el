@@ -16,9 +16,3 @@ Default keyboard bindings:
 * :kbd:`S-f5`: run the current test group
 * :kbd:`C-f5`: run the current test file
 * :kbd:`M-f5`: run the whole test suite
-
-.. toctree::
-   :maxdepth: 2
-   :caption: Contents:
-
-   keybindings
