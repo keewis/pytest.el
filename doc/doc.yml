@@ -1,0 +1,11 @@
+name: pytest.el
+channels:
+  - conda-forge
+dependencies:
+  - python=3.7
+  - pytest
+  - sphinx
+  - sphinx_rtd_theme
+  - pip
+  - pip:
+    - readthedocs-sphinx-ext
