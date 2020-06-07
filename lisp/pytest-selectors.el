@@ -4,7 +4,7 @@
 ;;; Code:
 (require 's)
 
-(defun always-list (arg)
+(defun pytest--always-list (arg)
   "Ensure ARG is a list by wrapping it if necessary."
   (if (nlistp arg) (list arg) arg))
 
@@ -14,7 +14,7 @@
 
 (defun pytest--join-selector (selector)
   "Convert SELECTOR to be compatible with pytest."
-  (s-join "::" (always-list selector)))
+  (s-join "::" (pytest--always-list selector)))
 
 (defun pytest--normalize-selector (selector)
   "Convert SELECTOR to a list of components."
