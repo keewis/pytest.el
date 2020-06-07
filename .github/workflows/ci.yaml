@@ -21,7 +21,15 @@ jobs:
 
       - name: install dependencies
         run: |
-          emacs -batch -Q --eval "(package-initialize)" --eval "(package-install '(\"s\"))"
+          export archives='(("melpa" . "https://melpa.org/packages/")
+                            ("elpa" . "https://elpa.gnu.org/packages/"))'
+          export packages="(s projectile cl)"
+          echo "y" | emacs -batch -Q \
+            --eval "(package-initialize)" \
+            --eval "(setq package-archives '$archives)" \
+            --eval "(package-refresh-contents)" \
+            --eval "(setq package-selected-packages '$packages)" \
+            --eval "(package-install-selected-packages)"
 
       - name: run tests
         run: |
