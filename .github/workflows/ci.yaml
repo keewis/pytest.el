@@ -19,6 +19,10 @@ jobs:
         with:
           version: 26.1
 
+      - name: install dependencies
+        run: |
+          emacs -batch -Q --eval "(package-initialize)" --eval "(package-install '(\"s\"))"
+
       - name: run tests
         run: |
           export test_files=$(find tests -name "*.el" | while read x; do echo -n " -l $(basename $x)"; done)
