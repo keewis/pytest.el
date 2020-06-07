@@ -21,8 +21,8 @@ jobs:
 
       - name: run tests
         run: |
-          ls -l
-          emacs -batch -l ert -L lisp -l pytest-selectors -l tests/test-selectors.el -f ert-run-tests-batch-and-exit
+          export test_files=$(find tests -name "*.el" | while read x; do echo -n " -l $(basename $x)"; done)
+          emacs -batch -Q --eval "(package-initialize)" -l ert -L lisp -L tests $test_files -f ert-run-tests-batch-and-exit
 
   docs:
     name: Docs
