@@ -3,6 +3,7 @@
 ;; functions to process and format test selectors
 ;;; Code:
 (require 's)
+(require 'cl)
 
 (defun pytest--test-file-p (path)
   "Is PATH a pytest test file?"
