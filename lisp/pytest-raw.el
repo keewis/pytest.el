@@ -34,31 +34,6 @@
   (read-only-mode)
   (setq quit-restore "bury"))
 
-(defun pytest--test-file-p (path)
-  "Is PATH a pytest test file?"
-  (let ((name (file-name-nondirectory path)))
-    (and (s-starts-with-p "test_" name) (s-ends-with-p ".py" name))))
-
-(defun pytest--test-components-p (components)
-  "Is every entry in COMPONENTS a test class?"
-  (every (lambda (x) (s-starts-with-p "Test" x)) components))
-
-(defun pytest--test-p (selector)
-  "Is SELECTOR a pytest test?"
-  (let ((file-path (car selector))
-        (full-name (cdr selector))
-        components
-        name)
-    (setq components (butlast full-name))
-    (setq name (car (last full-name)))
-    (setq is-test-file (pytest--test-file-p file-path))
-    (setq is-test-components (or (not components)
-                                 (pytest--test-components-p components)))
-    (setq is-test-name (or (not name)
-                           (s-starts-with-p "test_" name)
-                           (s-starts-with-p "Test" name)))
-    (and is-test-file is-test-components is-test-name)))
-
 (defun pytest--run-raw (&optional args selectors dir buffer-name)
   "Run pytest in a raw buffer named BUFFER-NAME.
 

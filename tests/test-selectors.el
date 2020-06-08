@@ -25,6 +25,32 @@
 
 (require 'pytest-selectors)
 
+;; information about a single selector
+(ert-deftest pytest--test-file-p ()
+  (should (equal (pytest--test-file-p "tests/test_file.py") t))
+  (should (equal (pytest--test-file-p "test_file.pyi") nil))
+  (should (equal (pytest--test-file-p "testfile.py") nil)))
+
+(ert-deftest pytest--test-components-p ()
+  (should (equal (pytest--test-components-p '("TestGroup1" "TestSubgroup")) t))
+  (should (equal (pytest--test-components-p '("TestGroup1")) t))
+  (should (equal (pytest--test-components-p '("FactoryTest" "TestSubgroup")) nil))
+  (should (equal (pytest--test-components-p '("TestGroup" "SubgroupTest")) nil)))
+
+(ert-deftest pytest--test-name-p ()
+  (should (equal (pytest--test-name-p "TestGroup") t))
+  (should (equal (pytest--test-name-p "test_function") t))
+  (should (equal (pytest--test-name-p "GroupTest") nil))
+  (should (equal (pytest--test-name-p "function") nil))
+  (should (equal (pytest--test-name-p "") nil)))
+
+(ert-deftest pytest--test-p ()
+  (should (equal (pytest--test-p '("tests/test_file.py" "TestCase" "test_function")) t))
+  (should (equal (pytest--test-p '("tests/test_file.py" "FactoryTest" "test_function")) nil))
+  (should (equal (pytest--test-p '("tests/test_file.pyx" "TestCase" "test_function")) nil))
+  (should (equal (pytest--test-p '("tests/file.py" "TestCase" "test_function")) nil))
+  (should (equal (pytest--test-p '("tests/test_file.py" "TestCase" "function")) nil)))
+
 ;; single selector manipulation
 (ert-deftest pytest--split-selector ()
   (let ((selector "test_file.py::TestGroup::test_function")

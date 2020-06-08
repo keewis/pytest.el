@@ -4,6 +4,40 @@
 ;;; Code:
 (require 's)
 
+(defun pytest--test-file-p (path)
+  "Is PATH a pytest test file?"
+  (let ((name (file-name-nondirectory path)))
+    (and (s-starts-with-p "test_" name) (s-ends-with-p ".py" name))))
+
+(defun pytest--test-components-p (components)
+  "Is every entry in COMPONENTS a test class?"
+  ;; this won't work with unittest.TestCase classes since those can be
+  ;; named anything. Does python-mode provide functions to get base classes?
+  (every (lambda (x) (s-starts-with-p "Test" x)) components))
+
+(defun pytest--test-name-p (name)
+  "Is NAME a test or a test group?"
+  (or (s-starts-with-p "test_" name)
+      (s-starts-with-p "Test" name)))
+
+(defun pytest--test-p (selector)
+  "Is SELECTOR a pytest test?"
+  (let ((file-path (car selector))
+        (full-name (cdr selector))
+        components
+        name
+        is-test-file
+        is-test-components
+        is-test-name)
+    (setq components (butlast full-name))
+    (setq name (car (last full-name)))
+    (setq is-test-file (pytest--test-file-p file-path))
+    (setq is-test-components (or (not components)
+                                 (pytest--test-components-p components)))
+    (setq is-test-name (or (not name)
+                           (pytest--test-name-p name)))
+    (and is-test-file is-test-components is-test-name)))
+
 (defun pytest--always-list (arg)
   "Ensure ARG is a list by wrapping it if necessary."
   (if (nlistp arg) (list arg) arg))
