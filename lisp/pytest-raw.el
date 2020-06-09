@@ -110,7 +110,7 @@ If DIR is non-nil, run pytest in it."
         (args (list "--color=yes"))
         name)
     (setq name (pytest--buffer-name 'pytest-raw-mode prepared-selectors))
-    (if (every 'pytest--test-p prepared-selectors)
+    (if (cl-every 'pytest--test-p prepared-selectors)
         (pytest--run-raw args prepared-selectors dir name))))
 
 (defun pytest-run-current-file ()
