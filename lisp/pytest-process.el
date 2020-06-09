@@ -49,7 +49,7 @@ to work in every virtual environment."
 
 (defun pytest--construct-command (args)
   "Construct the pytest command using ARGS."
-  (let ((command (append (cons pytest-python-executable '("-m" "pytest")) args)))
+  (let ((command (append (pytest--command) args)))
     (s-join " " command)))
 
 (defun pytest--run (&optional args dir output-buffer)
