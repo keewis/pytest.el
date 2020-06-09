@@ -51,6 +51,7 @@
   (setq-local font-lock-syntactic-face-function #'ignore)
   (setq show-trailing-whitespace nil)
   (read-only-mode)
+  (defvar quit-restore)
   (setq quit-restore "bury"))
 
 (defun pytest--run-raw (&optional args selectors dir buffer-name)
@@ -64,6 +65,7 @@ If DIR is non-nil, run pytest in it."
         (output-buffer (pytest--buffer-by-name buffer-name)))
     (pytest--run args dir output-buffer)
     (with-current-buffer output-buffer
+      (defvar called-selectors)
       (setq-local called-selectors selectors)
       (pytest-raw-mode))))
 
