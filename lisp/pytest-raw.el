@@ -20,8 +20,8 @@
 ;;; These interactive functions should be used to bind keys in python-mode
 
 ;;; Code:
-
-(require 'cl)
+(require 'cl-lib)
+(require 'dash)
 
 (require 'pytest-buffers)
 (require 'pytest-info)
