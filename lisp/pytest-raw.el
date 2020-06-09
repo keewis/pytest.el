@@ -26,6 +26,7 @@
 (require 'pytest-buffers)
 (require 'pytest-info)
 (require 'pytest-process)
+(require 'pytest-selectors)
 
 (defun pytest-bury-buffer ()
   "Kill or bury the currently active window."
