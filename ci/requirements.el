@@ -28,7 +28,7 @@
 
 (package-initialize)
 
-(setq package-selected-packages '(s project cl))
+(setq package-selected-packages '(s project cl buttercup))
 
 (package-install-selected-packages)
 
