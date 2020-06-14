@@ -29,7 +29,7 @@
 (package-initialize)
 
 (package-refresh-contents)
-(setq package-selected-packages '(s project cl buttercup))
+(setq package-selected-packages '(s projectile cl buttercup))
 
 (package-install-selected-packages)
 
