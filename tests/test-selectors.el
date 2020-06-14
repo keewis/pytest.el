@@ -21,85 +21,99 @@
 
 ;;; Code:
 
-(require 'ert)
-
 (require 'pytest-selectors)
 
 ;; information about a single selector
-(ert-deftest pytest--test-file-p ()
-  (should (equal (pytest--test-file-p "tests/test_file.py") t))
-  (should (equal (pytest--test-file-p "test_file.pyi") nil))
-  (should (equal (pytest--test-file-p "testfile.py") nil)))
+(describe "information about a single selector"
+  (it "does the selector contain a test file? (pytest--test-file-p)"
+    (expect (pytest--test-file-p "tests/test_file.py") :to-be t)
+    (expect (pytest--test-file-p "test_file.pyi") :to-be nil)
+    (expect (pytest--test-file-p "testfile.py") :to-be nil))
 
-(ert-deftest pytest--test-components-p ()
-  (should (equal (pytest--test-components-p '("TestGroup1" "TestSubgroup")) t))
-  (should (equal (pytest--test-components-p '("TestGroup1")) t))
-  (should (equal (pytest--test-components-p '("FactoryTest" "TestSubgroup")) nil))
-  (should (equal (pytest--test-components-p '("TestGroup" "SubgroupTest")) nil)))
+  (it "does the list only contain test components? (pytest--test-components-p)"
+    (expect (pytest--test-components-p '("TestGroup1" "TestSubgroup")) :to-be t)
+    (expect (pytest--test-components-p '("TestGroup1")) :to-be t)
+    (expect (pytest--test-components-p '("FactoryTest" "TestSubgroup")) :to-be nil)
+    (expect (pytest--test-components-p '("TestGroup" "SubgroupTest")) :to-be nil))
 
-(ert-deftest pytest--test-name-p ()
-  (should (equal (pytest--test-name-p "TestGroup") t))
-  (should (equal (pytest--test-name-p "test_function") t))
-  (should (equal (pytest--test-name-p "GroupTest") nil))
-  (should (equal (pytest--test-name-p "function") nil))
-  (should (equal (pytest--test-name-p "") nil)))
+  (it "does the last element describe a test? (pytest--test-name-p)"
+    (expect (pytest--test-name-p "TestGroup") :to-be t)
+    (expect (pytest--test-name-p "test_function") :to-be t)
+    (expect (pytest--test-name-p "GroupTest") :to-be nil)
+    (expect (pytest--test-name-p "function") :to-be nil)
+    (expect (pytest--test-name-p "") :to-be nil))
 
-(ert-deftest pytest--test-p ()
-  (should (equal (pytest--test-p '("tests/test_file.py" "TestCase" "test_function")) t))
-  (should (equal (pytest--test-p '("tests/test_file.py" "FactoryTest" "test_function")) nil))
-  (should (equal (pytest--test-p '("tests/test_file.pyx" "TestCase" "test_function")) nil))
-  (should (equal (pytest--test-p '("tests/file.py" "TestCase" "test_function")) nil))
-  (should (equal (pytest--test-p '("tests/test_file.py" "TestCase" "function")) nil)))
+  (it "does the selector describe tests? (pytest--test-p)"
+    (expect (pytest--test-p '("tests/test_file.py" "TestCase" "test_function")) :to-be t)
+    (expect (pytest--test-p '("tests/test_file.py" "FactoryTest" "test_function")) :to-be nil)
+    (expect (pytest--test-p '("tests/test_file.pyx" "TestCase" "test_function")) :to-be nil)
+    (expect (pytest--test-p '("tests/file.py" "TestCase" "test_function")) :to-be nil)
+    (expect (pytest--test-p '("tests/test_file.py" "TestCase" "function")) :to-be nil)))
 
 ;; single selector manipulation
-(ert-deftest pytest--split-selector ()
-  (let ((selector "test_file.py::TestGroup::test_function")
-        (expected '("test_file.py" "TestGroup" "test_function")))
-    (should (equal (pytest--split-selector selector) expected))))
+(describe "manipulation of a single selector"
+  (it "split the selector into a list (pytest--split-selector)"
+    (expect (pytest--split-selector "test_file.py::TestGroup::test_function")
+            :to-equal '("test_file.py" "TestGroup" "test_function"))
+    ;; TODO: check how this works with invalid data
+    )
+  (it "join a selector list into a string (pytest--join-selector)"
+    (expect (pytest--join-selector '("test_file.py" "TestGroup" "test_function"))
+            :to-equal "test_file.py::TestGroup::test_function")
+    ;; TODO: check how this works with invalid data
+    )
 
-(ert-deftest pytest--join-selector ()
-  (let ((split-selector '("test_file.py" "TestGroup" "test_function"))
-        (expected "test_file.py::TestGroup::test_function"))
-    (should (equal (pytest--join-selector split-selector) expected))))
-             
-(ert-deftest pytest--normalize-selector ()
-  (let ((selector '("test_file.py" "TestGroup::test_function"))
-        (expected '("test_file.py" "TestGroup" "test_function")))
-    (should (equal (pytest--normalize-selector selector) expected))))
+  (it "make sure the selector is properly split into components (pytest--normalize-selector)"
+    (expect (pytest--normalize-selector '("test_file.py" "TestGroup::test_function"))
+            :to-equal '("test_file.py" "TestGroup" "test_function"))
+    ;; TODO: check how this works with invalid data
+    )
 
-(ert-deftest pytest--format-selector ()
-  (let ((selector '("tests/test_file.py" "TestGroup" "test_function"))
-        (expected "file::Group::function"))
-    (should (equal (pytest--format-selector selector) expected))))
+  (it "remove the directory component (pytest--strip-directory)"
+    (expect (pytest--strip-directory '("tests/test_file.py" "test_function"))
+            :to-equal '("test_file.py" "test_function"))
+    ;; TODO: try to find edge cases. How does this work when the file
+    ;; doesn't have a directory component?
+    )
 
-(ert-deftest pytest--strip-directory ()
-  (let ((selector '("tests/test_file.py" "test_function"))
-        (expected '("test_file.py" "test_function")))
-    (should (equal (pytest--strip-directory selector) expected))))
+  (it "format the selector for use in a buffer title (pytest--format-selector)"
+    (expect (pytest--format-selector '("tests/test_file.py" "TestGroup" "test_function"))
+            :to-equal "file::Group::function")
+    ;; TODO: more tests
+    ))
 
 ;; selector list manipulation
-(ert-deftest pytest--join-selectors ()
-  (let ((selectors '(("test_file1.py" "TestGroup1" "test_function")
+(describe "manipulation of a list of selectors"
+  (it "split all selectors into components (pytest--split-selectors)"
+    (expect (pytest--split-selectors '("test_file1.py::TestGroup1::test_function"
+                                      "test_file2.py::TestGroup2::test_function"))
+            :to-equal '(("test_file1.py" "TestGroup1" "test_function")
                      ("test_file2.py" "TestGroup2" "test_function")))
-        (expected '("test_file1.py::TestGroup1::test_function" "test_file2.py::TestGroup2::test_function")))
-    (should (equal (pytest--join-selectors selectors) expected))))
+    ;; TODO: more tests (especially edge cases)
+    )
 
-(ert-deftest pytest--split-selectors ()
-  (let ((selectors '("test_file1.py::TestGroup1::test_function" "test_file2.py::TestGroup2::test_function"))
-        (expected '(("test_file1.py" "TestGroup1" "test_function")
-                    ("test_file2.py" "TestGroup2" "test_function"))))
-    (should (equal (pytest--split-selectors selectors) expected))))
+  (it "join every selector's components into strings (pytest--join-selectors)"
+    (expect (pytest--join-selectors '(("test_file1.py" "TestGroup1" "test_function")
+                                      ("test_file2.py" "TestGroup2" "test_function")))
+            :to-equal '("test_file1.py::TestGroup1::test_function"
+                     "test_file2.py::TestGroup2::test_function"))
+    ;; TODO: more tests
+    )
 
-(ert-deftest pytest--normalize-selectors ()
-  (let ((selectors '(("test_file1.py::test_function1") ("test_file2.py" "test_function2")))
-        (expected '(("test_file1.py" "test_function1") ("test_file2.py" "test_function2"))))
-    (should (equal (pytest--normalize-selectors selectors) expected))))
+  (it "make sure all selectors are properly split into components (pytest--normalize-selectors)"
+    (expect (pytest--normalize-selectors '(("test_file1.py::test_function1")
+                                           ("test_file2.py" "test_function2")))
+            :to-equal '(("test_file1.py" "test_function1")
+                     ("test_file2.py" "test_function2")))
+    ;; TODO: more tests
+    )
 
-(ert-deftest pytest--format-selectors ()
-  (let ((selectors '(("tests/test_file.py" "TestGroup" "test_function1")
-                    ("tests/test_file.py" "test_function2")))
-        (expected '("file::Group::function1" "file::function2")))
-    (should (equal (pytest--format-selectors selectors) expected))))
+  (it "format all selectors for use in a buffer title (pytest--format-selectors)"
+    (expect (pytest--format-selectors '(("tests/test_file.py" "TestGroup" "test_function1")
+                                        ("tests/test_file.py" "test_function2")))
+            :to-equal '("file::Group::function1" "file::function2"))
+    ;; TODO: more tests
+    ))
 
 (provide 'test-selectors)
 ;;; test-selectors.el ends here

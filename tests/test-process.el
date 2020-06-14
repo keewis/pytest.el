@@ -21,17 +21,17 @@
 
 ;;; Code:
 
-(require 'ert)
-
 (require 'pytest-process)
 
-(ert-deftest pytest--command ()
-  (should (equal (pytest--command) '("python" "-m" "pytest"))))
+(describe "pytest commands"
+  (it "constructs the base command without args (pytest--command)"
+    (expect (pytest--command) :to-equal '("python" "-m" "pytest"))
+    (let ((pytest-python-executable "/usr/bin/python"))
+      (expect (pytest--command) :to-equal '("/usr/bin/python" "-m" "pytest"))))
 
-(ert-deftest pytest--construct-command ()
-  (let ((args (list "-v" "--color=yes")))
-    (should (equal (pytest--construct-command args)
-                   "python -m pytest -v --color=yes"))))
+  (it "constructs the command with args (pytest--construct-commands)"
+    (expect (pytest--construct-command '("-v" "--color=yes"))
+            :to-equal "python -m pytest -v --color=yes")))
 
 (provide 'test-process)
 ;;; test-process.el ends here
