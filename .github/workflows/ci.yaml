@@ -20,21 +20,14 @@ jobs:
           version: 26.1
 
       - name: install dependencies
-        run: |
-          export archives='(("melpa" . "https://melpa.org/packages/")
-                            ("elpa" . "https://elpa.gnu.org/packages/"))'
-          export packages="(s projectile cl)"
-          echo "y" | emacs -batch -Q \
-            --eval "(package-initialize)" \
-            --eval "(setq package-archives '$archives)" \
-            --eval "(package-refresh-contents)" \
-            --eval "(setq package-selected-packages '$packages)" \
-            --eval "(package-install-selected-packages)"
+        run: echo "y" | emacs -batch -Q -l ci/requirements.el
 
       - name: run tests
         run: |
-          export test_files=$(find tests -name "*.el" | while read x; do echo -n " -l $(basename $x)"; done)
-          emacs -batch -Q --eval "(package-initialize)" -l ert -L lisp -L tests $test_files -f ert-run-tests-batch-and-exit
+          emacs -batch -Q \
+            -l package -f package-initialize \
+            -L lisp \
+            -l buttercup -f buttercup-run-discover
 
   docs:
     name: Docs
