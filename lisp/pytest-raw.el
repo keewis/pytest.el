@@ -21,7 +21,6 @@
 
 ;;; Code:
 (require 'cl-lib)
-(require 'dash)
 
 (require 'pytest-buffers)
 (require 'pytest-info)
@@ -62,7 +61,7 @@ If SELECTORS is non-nil, only run SELECTORS.
 If ARGS is non-nil, pass them to pytest.
 If DIR is non-nil, run pytest in it."
   (let ((selectors (pytest--normalize-selectors selectors))
-        (args (-concat args (pytest--join-selectors selectors)))
+        (args (append args (pytest--join-selectors selectors)))
         (output-buffer (pytest--buffer-by-name buffer-name)))
     (pytest--run args dir output-buffer)
     (with-current-buffer output-buffer
