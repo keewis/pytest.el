@@ -21,6 +21,8 @@
 
 ;;; Code:
 
+(require 's)
+
 (defun jump-to-line (line)
   "Jump to LINE in the current buffer."
   (goto-char (point-min))
