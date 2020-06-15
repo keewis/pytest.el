@@ -23,6 +23,8 @@
 
 (require 's)
 
+(require 'pytest-info)
+
 (defun jump-to-line (line)
   "Jump to LINE in the current buffer."
   (goto-char (point-min))
