@@ -25,17 +25,27 @@
 ;;; Code:
 
 (require 'python)
+(require 'rx)
+(require 's)
+
+(defun pytest-info--decorator-p ()
+  "Is there a decorator call at the current position?"
+  (let (at-decorator-p)
+    (save-excursion
+      (python-nav-beginning-of-statement)
+      (setq at-decorator-p (looking-at (python-rx decorator))))
+    at-decorator-p))
 
 (defun pytest-info--current-pos ()
   "Collect information about the current position."
-  (save-excursion
-    (let ((name (python-info-current-defun))
-          (buffer (buffer-file-name)))
-      (unless name
-        (python-nav-beginning-of-defun)
-        (python-nav-forward-statement)
-        (setq name (python-info-current-defun)))
-      (list buffer name))))
+  (let ((name (python-info-current-defun))
+        (buffer (buffer-file-name)))
+    (unless name
+      (save-excursion
+        (while (pytest-info--decorator-p)
+          (python-nav-forward-statement))
+        (setq name (python-info-current-defun))))
+    (list buffer name)))
 
 (defun pytest-info--as-selector (info)
   "Convert INFO to a selector."
