@@ -21,6 +21,7 @@
 
 ;;; Code:
 
+(require 'projectile)
 (require 's)
 
 (require 'pytest-info)
