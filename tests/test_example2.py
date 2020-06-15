@@ -1,9 +1,14 @@
+import unittest
 import pytest
 
 
 def test_case():
     raise ValueError("always fails")
 
+@pytest.mark.skipif(
+    False,
+    reason="don't skip the whole group",
+)
 class TestGroup:
     def test_pass(self):
         pass
@@ -19,3 +24,10 @@ class TestGroup:
     @pytest.mark.xfail
     def test_xpass(self):
         pass
+
+class GroupTest(unittest.TestCase):
+    def test_pass(self):
+        pass
+
+    def test_fail(self):
+        raise ValueError("always fails")

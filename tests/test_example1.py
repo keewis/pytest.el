@@ -44,6 +44,8 @@ def test_skip():
     pytest.param(4, marks=pytest.mark.xfail),
     pytest.param(5, marks=pytest.mark.skip),
 ])
+@pytest.mark.xfail
+@pytest.mark.skip
 def variable(request):
     assert request.param != 2
     return request.param
