@@ -45,21 +45,14 @@
 
 (defun pytest--test-p (selector)
   "Is SELECTOR a pytest test?"
-  (let ((file-path (car selector))
-        (full-name (cdr selector))
-        components
-        name
-        is-test-file
-        is-test-components
-        is-test-name)
-    (setq components (butlast full-name))
-    (setq name (car (last full-name)))
-    (setq is-test-file (pytest--test-file-p file-path))
-    (setq is-test-components (or (not components)
-                                 (pytest--test-components-p components)))
-    (setq is-test-name (or (not name)
-                           (pytest--test-name-p name)))
-    (and is-test-file is-test-components is-test-name)))
+  (let* ((file-path (car selector))
+         (full-name (cdr selector))
+         (groups (butlast full-name))
+         (name (car (last full-name)))
+         (is-test-file (pytest--test-file-p file-path))
+         (is-test-groups (cl-every 'pytest--test-group-p groups))
+         (is-test-name (pytest--test-name-p name)))
+    (and is-test-file is-test-groups is-test-name)))
 
 ;; manipulation
 (defun pytest--always-list (arg)
