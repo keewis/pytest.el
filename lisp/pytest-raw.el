@@ -20,12 +20,12 @@
 ;;; These interactive functions should be used to bind keys in python-mode
 
 ;;; Code:
-
-(require 'cl)
+(require 'cl-lib)
 
 (require 'pytest-buffers)
 (require 'pytest-info)
 (require 'pytest-process)
+(require 'pytest-selectors)
 
 (defun pytest-bury-buffer ()
   "Kill or bury the currently active window."
@@ -51,32 +51,8 @@
   (setq-local font-lock-syntactic-face-function #'ignore)
   (setq show-trailing-whitespace nil)
   (read-only-mode)
+  (defvar quit-restore)
   (setq quit-restore "bury"))
-
-(defun pytest--test-file-p (path)
-  "Is PATH a pytest test file?"
-  (let ((name (file-name-nondirectory path)))
-    (and (s-starts-with-p "test_" name) (s-ends-with-p ".py" name))))
-
-(defun pytest--test-components-p (components)
-  "Is every entry in COMPONENTS a test class?"
-  (every (lambda (x) (s-starts-with-p "Test" x)) components))
-
-(defun pytest--test-p (selector)
-  "Is SELECTOR a pytest test?"
-  (let ((file-path (car selector))
-        (full-name (cdr selector))
-        components
-        name)
-    (setq components (butlast full-name))
-    (setq name (car (last full-name)))
-    (setq is-test-file (pytest--test-file-p file-path))
-    (setq is-test-components (or (not components)
-                                 (pytest--test-components-p components)))
-    (setq is-test-name (or (not name)
-                           (s-starts-with-p "test_" name)
-                           (s-starts-with-p "Test" name)))
-    (and is-test-file is-test-components is-test-name)))
 
 (defun pytest--run-raw (&optional args selectors dir buffer-name)
   "Run pytest in a raw buffer named BUFFER-NAME.
@@ -85,10 +61,11 @@ If SELECTORS is non-nil, only run SELECTORS.
 If ARGS is non-nil, pass them to pytest.
 If DIR is non-nil, run pytest in it."
   (let ((selectors (pytest--normalize-selectors selectors))
-        (args (-concat args (pytest--join-selectors selectors)))
+        (args (append args (pytest--join-selectors selectors)))
         (output-buffer (pytest--buffer-by-name buffer-name)))
     (pytest--run args dir output-buffer)
     (with-current-buffer output-buffer
+      (defvar called-selectors)
       (setq-local called-selectors selectors)
       (pytest-raw-mode))))
 
@@ -133,7 +110,7 @@ If DIR is non-nil, run pytest in it."
         (args (list "--color=yes"))
         name)
     (setq name (pytest--buffer-name 'pytest-raw-mode prepared-selectors))
-    (if (every 'pytest--test-p prepared-selectors)
+    (if (cl-every 'pytest--test-p prepared-selectors)
         (pytest--run-raw args prepared-selectors dir name))))
 
 (defun pytest-run-current-file ()

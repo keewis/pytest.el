@@ -1,0 +1,54 @@
+name: CI
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  tests:
+    name: Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: checkout
+        uses: actions/checkout@v2
+
+      - name: setup emacs
+        uses: purcell/setup-emacs@master
+        with:
+          version: 26.1
+
+      - name: install dependencies
+        run: echo "y" | emacs -batch -Q -l ci/requirements.el
+
+      - name: run tests
+        run: |
+          emacs -batch -Q \
+            -l package -f package-initialize \
+            -L lisp \
+            -l buttercup -f buttercup-run-discover
+
+  docs:
+    name: Docs
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: checkout
+        uses: actions/checkout@v2
+
+      - name: setup python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.8
+
+      - name: upgrade pip
+        run: python -m pip install -U pip setuptools
+
+      - name: install sphinx
+        run: python -m pip install sphinx sphinx_rtd_theme
+
+      - name: build
+        run: |
+          cd doc
+          python -m sphinx -M html -d _build/doctrees -Ea -WT --keep-going -n . _build/html
