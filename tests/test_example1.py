@@ -33,7 +33,7 @@ def test_xpass():
     assert True
 
 @pytest.mark.skipif(
-    "def" not in {"abc", "def", "ghi"},
+    "def" in {"abc", "def", "ghi"},
     reason="skipping the test without a valid reason",
 )
 def test_skip():
