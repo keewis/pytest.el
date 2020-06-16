@@ -17,7 +17,7 @@
 
 ;;; Commentary:
 
-;; 
+;;
 
 ;;; Code:
 
@@ -29,12 +29,6 @@
     (expect (pytest--test-file-p "tests/test_file.py") :to-be t)
     (expect (pytest--test-file-p "test_file.pyi") :to-be nil)
     (expect (pytest--test-file-p "testfile.py") :to-be nil))
-
-  (it "does the list only contain test components? (pytest--test-components-p)"
-    (expect (pytest--test-components-p '("TestGroup1" "TestSubgroup")) :to-be t)
-    (expect (pytest--test-components-p '("TestGroup1")) :to-be t)
-    (expect (pytest--test-components-p '("FactoryTest" "TestSubgroup")) :to-be nil)
-    (expect (pytest--test-components-p '("TestGroup" "SubgroupTest")) :to-be nil))
 
   (it "does the last element describe a test? (pytest--test-name-p)"
     (expect (pytest--test-name-p "TestGroup") :to-be t)

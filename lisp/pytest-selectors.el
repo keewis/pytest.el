@@ -43,12 +43,6 @@
   (or (pytest--test-group-p name)
       (pytest--test-name-p name)))
 
-(defun pytest--test-components-p (components)
-  "Is every entry in COMPONENTS a test class?"
-  ;; this won't work with unittest.TestCase classes since those can be
-  ;; named anything. Does python-mode provide functions to get base classes?
-  (cl-every 'pytest--test-group-p components))
-
 (defun pytest--test-p (selector)
   "Is SELECTOR a pytest test?"
   (let ((file-path (car selector))
