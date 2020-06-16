@@ -52,9 +52,9 @@
         (while (pytest-info--decorator-p)
           (python-nav-forward-statement)))
       (setq name (python-info-current-defun))
-    (cons path (s-split "\\." name)))))
-
-
+    (if name
+        (cons path (s-split "\\." name))
+      nil))))
 
 (defun pytest-info--as-group (selector)
   "Get the test group of SELECTOR or nil."
