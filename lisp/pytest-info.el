@@ -35,10 +35,13 @@
 
 (defun pytest-info--decorator-p ()
   "Is there a decorator call at the current position?"
-  (let (at-decorator-p)
+  ;; can't use (python-rx decorator) since that uses ^ to match from
+  ;; the start of the line, but looking-at provides only from point on
+  (let ((regexp "@[_[:alpha:]][_[:word:]]*")
+        at-decorator-p)
     (save-excursion
       (python-nav-beginning-of-statement)
-      (setq at-decorator-p (looking-at (python-rx decorator))))
+      (setq at-decorator-p (looking-at regexp)))
     at-decorator-p))
 
 (defun pytest-info-current-pos ()
