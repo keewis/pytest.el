@@ -141,8 +141,7 @@ If DIR is non-nil, run pytest in it."
   "Rerun the selectors in a raw buffer."
   (interactive)
   (let ((selectors (buffer-local-value 'called-selectors (current-buffer))))
-    (if selectors
-        (pytest-run-selectors selectors))))
+    (if selectors (pytest-run-selectors selectors))))
 
 (provide 'pytest-raw)
 ;;; pytest-raw.el ends here
