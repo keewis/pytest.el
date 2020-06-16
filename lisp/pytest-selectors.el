@@ -30,16 +30,24 @@
   (let ((name (file-name-nondirectory path)))
     (and (s-starts-with-p "test_" name) (s-ends-with-p ".py" name))))
 
+(defun pytest--test-group-p (name)
+  "Is NAME a test group?"
+  (s-starts-with-p "Test" name))
+
+(defun pytest--test-name-p (name)
+  "Is NAME a test?"
+  (s-starts-with-p "test_" name))
+
+(defun pytest--test-name-or-group-p (name)
+  "Is NAME a test or a test group?"
+  (or (pytest--test-group-p name)
+      (pytest--test-name-p name)))
+
 (defun pytest--test-components-p (components)
   "Is every entry in COMPONENTS a test class?"
   ;; this won't work with unittest.TestCase classes since those can be
   ;; named anything. Does python-mode provide functions to get base classes?
-  (cl-every (lambda (x) (s-starts-with-p "Test" x)) components))
-
-(defun pytest--test-name-p (name)
-  "Is NAME a test or a test group?"
-  (or (s-starts-with-p "test_" name)
-      (s-starts-with-p "Test" name)))
+  (cl-every 'pytest--test-group-p components))
 
 (defun pytest--test-p (selector)
   "Is SELECTOR a pytest test?"
@@ -91,6 +99,16 @@ The format of each selector is typically:
   [directory/]file[::nodeid]
 where nodeid is the identifier from python with '.' replaced by '::'."
   (mapcar 'pytest--normalize-selector selectors))
+
+(defun pytest--extract-group (selector)
+  "Use the right-most test group in SELECTOR."
+  (let* ((full-name (cdr selector))
+         (path (car selector))
+         (group (cl-loop for elem in full-name
+                         while (or (pytest--test-group-p elem)
+                                   (s-ends-with-p "Test" elem))
+                         collect elem)))
+    (if group (cons path group) nil)))
 
 ;; formatting
 (defun pytest--strip-directory (selector)

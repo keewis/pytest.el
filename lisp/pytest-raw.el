@@ -134,7 +134,7 @@ If DIR is non-nil, run pytest in it."
 (defun pytest-run-current-group ()
   "Run the test group at point."
   (interactive)
-  (let ((selector (pytest-info-current-group)))
+  (let ((selector (pytest--extract-group (pytest-info-current-pos))))
     (pytest-run-selector selector)))
 
 (defun pytest-raw-rerun ()
