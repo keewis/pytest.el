@@ -25,24 +25,64 @@
 
 ;; information about a single selector
 (describe "information about a single selector"
-  (it "does the selector contain a test file? (pytest--test-file-p)"
-    (expect (pytest--test-file-p "tests/test_file.py") :to-be t)
-    (expect (pytest--test-file-p "test_file.pyi") :to-be nil)
-    (expect (pytest--test-file-p "testfile.py") :to-be nil))
+  (describe "a function to check if the selector contains a test file (pytest--test-file-p)"
+    (it "detects a valid test file"
+      (expect (pytest--test-file-p "tests/test_file.py") :to-be t))
+    (it "does not detect non-python files"
+      (expect (pytest--test-file-p "test_file.pyi") :to-be nil))
 
-  (it "does the last element describe a test? (pytest--test-name-p)"
-    (expect (pytest--test-name-p "TestGroup") :to-be t)
-    (expect (pytest--test-name-p "test_function") :to-be t)
-    (expect (pytest--test-name-p "GroupTest") :to-be nil)
-    (expect (pytest--test-name-p "function") :to-be nil)
-    (expect (pytest--test-name-p "") :to-be nil))
+    (it "does not detect invalid file names"
+      (expect (pytest--test-file-p "testfile.py") :to-be nil)))
 
-  (it "does the selector describe tests? (pytest--test-p)"
-    (expect (pytest--test-p '("tests/test_file.py" "TestCase" "test_function")) :to-be t)
-    (expect (pytest--test-p '("tests/test_file.py" "FactoryTest" "test_function")) :to-be nil)
-    (expect (pytest--test-p '("tests/test_file.pyx" "TestCase" "test_function")) :to-be nil)
-    (expect (pytest--test-p '("tests/file.py" "TestCase" "test_function")) :to-be nil)
-    (expect (pytest--test-p '("tests/test_file.py" "TestCase" "function")) :to-be nil)))
+  (describe "a function to check if a name describes a test group (pytest--test-group-p)"
+    (it "detects a valid test group"
+      (expect (pytest--test-group-p "TestGroup") :to-be t))
+
+    (it "does not detect unittest groups"
+      (expect (pytest--test-group-p "GroupTest") :to-be nil)))
+
+  (describe "a function to check if a name describes a test function (pytest--test-name-p)"
+    (it "detects correctly named test functions"
+      (expect (pytest--test-name-p "test_function") :to-be t))
+
+    (it "does not detect invalid test function names"
+      (expect (pytest--test-name-p "function") :to-be nil))
+
+    (it "does not detect test group names"
+      (expect (pytest--test-name-p "TestGroup") :to-be nil))
+
+    (it "does not detect unittest group names"
+      (expect (pytest--test-name-p "GroupTest") :to-be nil))
+
+    (it "does not detect empty strings"
+      (expect (pytest--test-name-p "") :to-be nil)))
+
+  (describe "a function to check if a selector describes a test (pytest--test-p)"
+    (it "detects a valid selector"
+      (expect (pytest--test-p '("tests/test_file.py" "TestCase" "test_function"))
+              :to-be t)
+      (expect (pytest--test-p '("test_file.py" "test_function"))
+              :to-be t))
+
+    (it "does not detect invalid files"
+      (expect (pytest--test-p '("tests/test_file.pyx" "TestCase" "test_function"))
+              :to-be nil)
+      (expect (pytest--test-p '("tests/file.py" "TestCase" "test_function"))
+              :to-be nil))
+
+    (it "does not detect invalid test group names"
+      (expect (pytest--test-p '("tests/test_file.py" "FactoryTest" "test_function"))
+              :to-be nil))
+
+    (it "does not detect invalid test function names"
+      (expect (pytest--test-p '("tests/test_file.py" "TestCase" "function"))
+              :to-be nil))
+
+    (it "does not detect nested tests"
+      (expect (pytest--test-p '("test_file.py" "test_function" "TestCase"))
+              :to-be nil)
+      (expect (pytest--test-p '("test_file.py" "test_function" "test_function"))
+              :to-be nil))))
 
 ;; single selector manipulation
 (describe "manipulation of a single selector"
