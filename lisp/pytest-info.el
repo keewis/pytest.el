@@ -22,6 +22,10 @@
 ;; * fqn of the name
 ;; It also provides a function to convert this information into a selector
 
+;; these are the functions provided for external use:
+;; - pytest-info--decorator-p
+;; - pytest-info-current-pos
+
 ;;; Code:
 
 (require 'cl-lib)
@@ -37,16 +41,23 @@
       (setq at-decorator-p (looking-at (python-rx decorator))))
     at-decorator-p))
 
-(defun pytest-info--current-pos ()
-  "Collect information about the current position."
-  (let ((name (python-info-current-defun))
-        (buffer (buffer-file-name)))
-    (unless name
-      (save-excursion
+(defun pytest-info-current-pos ()
+  "Collect information about the current position.
+This contains
+- the buffer's file name
+- the fully qualified name relative to the current module
+- the content of the definition line (the def / class)"
+  (let (name (buffer (buffer-file-name)) line)
+    (save-excursion
+      (unless (looking-at (python-rx defun))
         (while (pytest-info--decorator-p)
-          (python-nav-forward-statement))
-        (setq name (python-info-current-defun))))
-    (list buffer name)))
+          (python-nav-forward-statement)))
+      (unless (looking-at (python-rx defun))
+        ;; we might be in the function's body
+        (python-nav-beginning-of-defun))
+      (setq name (python-info-current-defun))
+      (setq line (thing-at-point 'line)))
+    (list buffer name line)))
 
 (defun pytest-info--as-selector (info)
   "Convert INFO to a selector."

@@ -21,6 +21,7 @@
 
 ;;; Code:
 
+(require 'cl-lib)
 (require 'projectile)
 (require 's)
 
@@ -37,9 +38,17 @@
      (jump-to-line ,line)
      (progn ,body)))
 
+(defun path-join (&rest paths)
+  "Join PATHS into a single path."
+  (let* ((path (s-join "/" paths))
+        (split-path (s-split "/" path))
+        (filtered-path (cl-remove-if (lambda (n) (equal n "")) split-path)))
+    (s-join "/" (cons "" filtered-path))))
+
 (describe "information functions"
   ;; use before-all to make sure the file is only read once
-  :var* ((filepath (s-join "/" (list (projectile-project-root) "tests/test_example1.py")))
+  :var* ((path "tests/test_example1.py")
+         (filepath (path-join (projectile-project-root) path))
          (buffername (format "*buttercup::%s*" filepath))
          (buffer))
 
@@ -70,27 +79,27 @@
     (it "does not detect normal statements"
       (expect (with-mark-at-line 23 (pytest-info--decorator-p)) :to-be nil)))
 
-  (describe "a function to collect information about the current position (pytest-info--current-pos)"
+  (describe "a function to collect information about the current position (pytest-info-current-pos)"
     (it "does not collect information about a empty line at module level"
-      (expect (with-mark-at-line 5 (pytest-info--current-pos))
-              :to-equal (list filepath nil)))
+      (expect (with-mark-at-line 5 (pytest-info-current-pos))
+              :to-equal (list filepath nil "\n")))
     (it "detects a plain function"
-      (expect (with-mark-at-line 6 (pytest-info--current-pos))
-              :to-equal (list filepath "warn"))
-      (expect (with-mark-at-line 7 (pytest-info--current-pos))
-              :to-equal (list filepath "warn")))
+      (expect (with-mark-at-line 6 (pytest-info-current-pos))
+              :to-equal (list filepath "warn" "def warn():\n"))
+      (expect (with-mark-at-line 7 (pytest-info-current-pos))
+              :to-equal (list filepath "warn" "def warn():\n")))
     (it "detects a function with a decorator"
-      (expect (with-mark-at-line 10 (pytest-info--current-pos))
-              :to-equal (list filepath "failing"))
-      (expect (with-mark-at-line 39 (pytest-info--current-pos))
-              :to-equal (list filepath "test_skip")))
+      (expect (with-mark-at-line 10 (pytest-info-current-pos))
+              :to-equal (list filepath "failing" "def failing():\n"))
+      (expect (with-mark-at-line 39 (pytest-info-current-pos))
+              :to-equal (list filepath "test_skip" "def test_skip():\n")))
     (it "detects a function with multiple decorators"
-      (expect (with-mark-at-line 55 (pytest-info--current-pos))
-              :to-equal (list filepath "variable"))
-      (expect (with-mark-at-line 52 (pytest-info--current-pos))
-              :to-equal (list filepath "variable"))
-      (expect (with-mark-at-line 47 (pytest-info--current-pos))
-              :to-equal (list filepath "variable")))))
+      (expect (with-mark-at-line 54 (pytest-info-current-pos))
+              :to-equal (list filepath "variable" "def variable(request):\n"))
+      (expect (with-mark-at-line 51 (pytest-info-current-pos))
+              :to-equal (list filepath "variable" "def variable(request):\n"))
+      (expect (with-mark-at-line 46 (pytest-info-current-pos))
+              :to-equal (list filepath "variable" "def variable(request):\n")))))
 
 (provide 'test-info)
 ;;; test-info.el ends here
