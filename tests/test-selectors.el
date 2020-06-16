@@ -58,10 +58,16 @@
       (expect (pytest--test-name-p "") :to-be nil)))
 
   (describe "a function to check if a selector describes a test (pytest--test-p)"
-    (it "detects a valid selector"
-      (expect (pytest--test-p '("tests/test_file.py" "TestCase" "test_function"))
-              :to-be t)
+    (it "detects a test without groups"
       (expect (pytest--test-p '("test_file.py" "test_function"))
+              :to-be t))
+
+    (it "detects a group without tests"
+      (expect (pytest--test-p '("test_file.py" "TestGroup"))
+              :to-be t))
+
+    (it "detects a test with groups"
+      (expect (pytest--test-p '("tests/test_file.py" "TestCase" "test_function"))
               :to-be t))
 
     (it "does not detect invalid files"

@@ -51,7 +51,7 @@
          (name (car (last full-name)))
          (is-test-file (pytest--test-file-p file-path))
          (is-test-groups (cl-every 'pytest--test-group-p groups))
-         (is-test-name (pytest--test-name-p name)))
+         (is-test-name (pytest--test-name-or-group-p name)))
     (and is-test-file is-test-groups is-test-name)))
 
 ;; manipulation
