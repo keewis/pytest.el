@@ -22,7 +22,7 @@
 ;;; Code:
 
 (require 's)
-(require 'cl)
+(require 'cl-lib)
 
 (defun pytest--test-file-p (path)
   "Is PATH a pytest test file?"
@@ -33,7 +33,7 @@
   "Is every entry in COMPONENTS a test class?"
   ;; this won't work with unittest.TestCase classes since those can be
   ;; named anything. Does python-mode provide functions to get base classes?
-  (every (lambda (x) (s-starts-with-p "Test" x)) components))
+  (cl-every (lambda (x) (s-starts-with-p "Test" x)) components))
 
 (defun pytest--test-name-p (name)
   "Is NAME a test or a test group?"

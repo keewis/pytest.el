@@ -24,6 +24,7 @@
 
 ;;; Code:
 
+(require 'cl-lib)
 (require 'python)
 (require 'rx)
 (require 's)
@@ -67,7 +68,9 @@
 (defun pytest-info--as-group (selector)
   "Get the test group of SELECTOR or nil."
   (let ((file-path (car selector)) (components (cdr selector)) group-components group-selector)
-    (setq group-components (loop for elem in components while (s-starts-with-p "Test" elem) collect elem))
+    (setq group-components (cl-loop for elem in components
+                                 while (s-starts-with-p "Test" elem)
+                                 collect elem))
     (setq group-selector (if (> (length group-components) 0)
                              (cons file-path group-components)
                            nil))
