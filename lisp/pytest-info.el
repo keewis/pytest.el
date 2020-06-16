@@ -42,22 +42,14 @@
     at-decorator-p))
 
 (defun pytest-info-current-pos ()
-  "Collect information about the current position.
-This contains
-- the buffer's file name
-- the fully qualified name relative to the current module
-- the content of the definition line (the def / class)"
-  (let (name (buffer (buffer-file-name)) line)
+  "Construct a selector for the current position."
+  (let (name (path (buffer-file-name)))
     (save-excursion
       (unless (looking-at (python-rx defun))
         (while (pytest-info--decorator-p)
           (python-nav-forward-statement)))
-      (unless (looking-at (python-rx defun))
-        ;; we might be in the function's body
-        (python-nav-beginning-of-defun))
       (setq name (python-info-current-defun))
-      (setq line (thing-at-point 'line)))
-    (list buffer name line)))
+    (cons path (s-split "\\." name)))))
 
 (defun pytest-info--as-selector (info)
   "Convert INFO to a selector."
