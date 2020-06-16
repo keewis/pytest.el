@@ -24,6 +24,7 @@
 (require 's)
 (require 'cl-lib)
 
+;; predicates
 (defun pytest--test-file-p (path)
   "Is PATH a pytest test file?"
   (let ((name (file-name-nondirectory path)))
@@ -58,6 +59,7 @@
                            (pytest--test-name-p name)))
     (and is-test-file is-test-components is-test-name)))
 
+;; manipulation
 (defun pytest--always-list (arg)
   "Ensure ARG is a list by wrapping it if necessary."
   (if (nlistp arg) (list arg) arg))
@@ -90,6 +92,7 @@ The format of each selector is typically:
 where nodeid is the identifier from python with '.' replaced by '::'."
   (mapcar 'pytest--normalize-selector selectors))
 
+;; formatting
 (defun pytest--strip-directory (selector)
   "Remove the directory part of SELECTOR."
   (cons (file-name-nondirectory (car selector)) (cdr selector)))
