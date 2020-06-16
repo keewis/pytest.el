@@ -51,17 +51,6 @@
       (setq name (python-info-current-defun))
     (cons path (s-split "\\." name)))))
 
-(defun pytest-info--as-selector (info)
-  "Convert INFO to a selector."
-  (let ((file-path (car info))
-        (name (nth 1 info)))
-    (cons file-path (s-split "\\." name))))
-
-(defun pytest-info--current-selector ()
-  "Get a selector for the current position."
-  (let ((info (pytest-info--current-pos)) selector)
-    (setq selector (pytest-info--as-selector info))
-    selector))
 
 (defun pytest-info-current-test ()
   "Get a selector for the current test."
