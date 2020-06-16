@@ -52,10 +52,6 @@
     (cons path (s-split "\\." name)))))
 
 
-(defun pytest-info-current-test ()
-  "Get a selector for the current test."
-  (let ((selector (pytest-info--current-selector)))
-    selector))
 
 (defun pytest-info--as-group (selector)
   "Get the test group of SELECTOR or nil."
@@ -71,7 +67,7 @@
 (defun pytest-info-current-group ()
   "Get a selector for the current test group."
   (let (selector group-selector)
-    (setq selector (pytest-info--current-selector))
+    (setq selector (pytest-info-current-pos))
     (setq group-selector (pytest-info--as-group selector))
     group-selector))
 
