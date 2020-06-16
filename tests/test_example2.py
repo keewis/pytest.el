@@ -13,7 +13,9 @@ class TestGroup:
     def test_pass(self):
         pass
 
-    @pytest.mark.skip
+    @pytest.mark.skip(
+        reason="a long and elaborate reason on why this test has to fail"
+    )
     def test_skip(self):
         pass
 

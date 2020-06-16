@@ -22,63 +22,37 @@
 ;; * fqn of the name
 ;; It also provides a function to convert this information into a selector
 
+;; these are the functions provided for external use:
+;; - pytest-info--decorator-p
+;; - pytest-info-current-pos
+
 ;;; Code:
 
+(require 'cl-lib)
 (require 'python)
 (require 'rx)
 (require 's)
 
 (defun pytest-info--decorator-p ()
   "Is there a decorator call at the current position?"
-  (let (at-decorator-p)
+  ;; can't use (python-rx decorator) since that uses ^ to match from
+  ;; the start of the line, but looking-at provides only from point on
+  (let ((regexp "@[_[:alpha:]][_[:word:]]*")
+        at-decorator-p)
     (save-excursion
       (python-nav-beginning-of-statement)
-      (setq at-decorator-p (looking-at (python-rx decorator))))
+      (setq at-decorator-p (looking-at regexp)))
     at-decorator-p))
 
-(defun pytest-info--current-pos ()
-  "Collect information about the current position."
-  (let ((name (python-info-current-defun))
-        (buffer (buffer-file-name)))
-    (unless name
-      (save-excursion
+(defun pytest-info-current-pos ()
+  "Construct a selector for the current position."
+  (let (name (path (buffer-file-name)))
+    (save-excursion
+      (unless (looking-at (python-rx defun))
         (while (pytest-info--decorator-p)
-          (python-nav-forward-statement))
-        (setq name (python-info-current-defun))))
-    (list buffer name)))
-
-(defun pytest-info--as-selector (info)
-  "Convert INFO to a selector."
-  (let ((file-path (car info))
-        (name (nth 1 info)))
-    (cons file-path (s-split "\\." name))))
-
-(defun pytest-info--current-selector ()
-  "Get a selector for the current position."
-  (let ((info (pytest-info--current-pos)) selector)
-    (setq selector (pytest-info--as-selector info))
-    selector))
-
-(defun pytest-info-current-test ()
-  "Get a selector for the current test."
-  (let ((selector (pytest-info--current-selector)))
-    selector))
-
-(defun pytest-info--as-group (selector)
-  "Get the test group of SELECTOR or nil."
-  (let ((file-path (car selector)) (components (cdr selector)) group-components group-selector)
-    (setq group-components (loop for elem in components while (s-starts-with-p "Test" elem) collect elem))
-    (setq group-selector (if (> (length group-components) 0)
-                             (cons file-path group-components)
-                           nil))
-    group-selector))
-
-(defun pytest-info-current-group ()
-  "Get a selector for the current test group."
-  (let (selector group-selector)
-    (setq selector (pytest-info--current-selector))
-    (setq group-selector (pytest-info--as-group selector))
-    group-selector))
+          (python-nav-forward-statement)))
+      (setq name (python-info-current-defun)))
+    (if name (cons path (s-split "\\." name)) nil)))
 
 (provide 'pytest-info)
 ;;; pytest-info.el ends here
