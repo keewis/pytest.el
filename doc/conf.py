@@ -16,10 +16,12 @@
 
 
 # -- Project information -----------------------------------------------------
+import datetime as dt
 
-project = 'pytest.el'
-copyright = '2019, keewis'
-author = 'keewis'
+project = "pytest.el"
+author = f"{project} developers"
+year = dt.datetime.now().year
+copyright = f"{year}, {author}"
 
 
 # -- General configuration ---------------------------------------------------
