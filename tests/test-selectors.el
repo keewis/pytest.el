@@ -92,35 +92,70 @@
 
 ;; single selector manipulation
 (describe "manipulation of a single selector"
-  (it "split the selector into a list (pytest--split-selector)"
-    (expect (pytest--split-selector "test_file.py::TestGroup::test_function")
-            :to-equal '("test_file.py" "TestGroup" "test_function"))
+  (describe "a function to split a selector string into a list (pytest--split-selector)"
+    (it "splits a valid selector"
+      (expect (pytest--split-selector "test_file.py::TestGroup::test_function")
+              :to-equal '("test_file.py" "TestGroup" "test_function")))
     ;; TODO: check how this works with invalid data
     )
-  (it "join a selector list into a string (pytest--join-selector)"
-    (expect (pytest--join-selector '("test_file.py" "TestGroup" "test_function"))
-            :to-equal "test_file.py::TestGroup::test_function")
-    ;; TODO: check how this works with invalid data
-    )
-
-  (it "make sure the selector is properly split into components (pytest--normalize-selector)"
-    (expect (pytest--normalize-selector '("test_file.py" "TestGroup::test_function"))
-            :to-equal '("test_file.py" "TestGroup" "test_function"))
+  (describe "a function to join a selector list into a string (pytest--join-selector)"
+    (it "joins a valid selector"
+      (expect (pytest--join-selector '("test_file.py" "TestGroup" "test_function"))
+              :to-equal "test_file.py::TestGroup::test_function"))
     ;; TODO: check how this works with invalid data
     )
 
-  (it "remove the directory component (pytest--strip-directory)"
-    (expect (pytest--strip-directory '("tests/test_file.py" "test_function"))
-            :to-equal '("test_file.py" "test_function"))
+  (describe "a function to normalize a mixed selector list (pytest--normalize-selector)"
+    (it "correctly separates test components"
+      (expect (pytest--normalize-selector '("test_file.py" "TestGroup::test_function"))
+              :to-equal '("test_file.py" "TestGroup" "test_function")))
+    ;; TODO: check how this works with invalid data
+    )
+
+  (describe "a function to remove the directory from the path part (pytest--strip-directory)"
+    (it "removes a single directory"
+      (expect (pytest--strip-directory '("tests/test_file.py" "test_function"))
+              :to-equal '("test_file.py" "test_function")))
     ;; TODO: try to find edge cases. How does this work when the file
     ;; doesn't have a directory component?
     )
 
-  (it "format the selector for use in a buffer title (pytest--format-selector)"
-    (expect (pytest--format-selector '("tests/test_file.py" "TestGroup" "test_function"))
-            :to-equal "file::Group::function")
+  (describe "a function to format the selector for use in a buffer title (pytest--format-selector)"
+    (it "correctly formats a selector with path and group components"
+      (expect (pytest--format-selector '("tests/test_file.py" "TestGroup" "test_function"))
+              :to-equal "file::Group::function"))
     ;; TODO: more tests
-    ))
+    )
+
+  (describe "a function to extract a test from a selector (pytest--extract-test)"
+    (it "removes multiple trailing non-test function names"
+      (expect (pytest--extract-test '("test_file.py" "TestGroup" "test_func" "func1" "func2"))
+              :to-equal '("test_file.py" "TestGroup" "test_func")))
+    (it "removes a single trailing non-test function name"
+      (expect (pytest--extract-test '("test_file.py" "TestGroup" "test_func" "func"))
+              :to-equal '("test_file.py" "TestGroup" "test_func")))
+    (it "does not remove test function names"
+      (expect (pytest--extract-test '("test_file.py" "test_func"))
+              :to-equal '("test_file.py" "test_func")))
+    (it "does not remove from a test group"
+      (expect (pytest--extract-test '("test_file.py" "TestGroup" "func"))
+              :to-equal '("test_file.py" "TestGroup" "func")))
+    (it "does not remove from top-level"
+      (expect (pytest--extract-test '("test_file.py" "func"))
+              :to-equal '("test_file.py" "func"))))
+
+  (describe "a function to extract a test group from a selector (pytest--extract-group)"
+    (it "removes trailing function names"
+      (expect (pytest--extract-group '("test_file.py" "TestGroup" "test_func" "func"))
+              :to-equal '("test_file.py" "TestGroup")))
+    (it "does not remove test groups"
+      (expect (pytest--extract-group '("test_file.py" "TestGroup"))
+              :to-equal '("test_file.py" "TestGroup"))
+      (expect (pytest--extract-group '("test_file.py" "TestGroup1" "TestGroup2"))
+              :to-equal '("test_file.py" "TestGroup1" "TestGroup2")))
+    (it "never returns a test function"
+      (expect (pytest--extract-group '("test_file.py" "test_func" "func"))
+              :to-equal nil))))
 
 ;; selector list manipulation
 (describe "manipulation of a list of selectors"

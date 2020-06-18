@@ -51,6 +51,8 @@
       (unless (looking-at (python-rx defun))
         (while (pytest-info--decorator-p)
           (python-nav-forward-statement)))
+      (unless (looking-at (python-rx defun))
+        (python-nav-beginning-of-defun))
       (setq name (python-info-current-defun)))
     (if name (cons path (s-split "\\." name)) nil)))
 
