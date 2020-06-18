@@ -41,7 +41,8 @@ def test_xpass():
 
 
 @pytest.mark.skipif(
-    "def" in {"abc", "def", "ghi"}, reason="skipping the test without a valid reason",
+    "def" in {"abc", "def", "ghi"},
+    reason="skipping the test without a reason for testing purposes",
 )
 def test_skip():
     warn()
