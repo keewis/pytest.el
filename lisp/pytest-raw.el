@@ -91,7 +91,7 @@ If DIR is non-nil, run pytest in it."
     (if (pytest--test-file-p file)
         (pytest--run-raw args selectors dir name))))
 
-(defun pytest--wrong-selector (selector)
+(defun pytest--report-wrong-selector (selector)
   "Report SELECTOR as not valid."
   (if selector
       (error "Not a valid test: %s" (pytest--join-selector selector))
@@ -108,7 +108,7 @@ If DIR is non-nil, run pytest in it."
     (setq selectors (list prepared-selector))
     (if (pytest--test-p prepared-selector)
         (pytest--run-raw args selectors dir name)
-      (pytest--wrong-selector selector))))
+      (pytest--report-wrong-selector selector))))
 
 (defun pytest-run-selectors (selectors)
   "Run SELECTORS."
