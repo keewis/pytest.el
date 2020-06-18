@@ -25,6 +25,7 @@ def test_error(failing):
 @pytest.mark.xfail
 def test_xfail():
     warn()
+
     assert False
 
 @pytest.mark.xfail
