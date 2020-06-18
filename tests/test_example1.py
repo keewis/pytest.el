@@ -56,3 +56,12 @@ def variable(request):
 
 def test_variations(variable):
     assert example(variable)
+
+def test_nested():
+    def func():
+        def func2():
+            return 1
+
+        return func2()
+
+    assert func() == 1

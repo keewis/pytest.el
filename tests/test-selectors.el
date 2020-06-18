@@ -120,7 +120,24 @@
     (expect (pytest--format-selector '("tests/test_file.py" "TestGroup" "test_function"))
             :to-equal "file::Group::function")
     ;; TODO: more tests
-    ))
+    )
+
+  (describe "a function to extract a test from a selector (pytest--extract-test)"
+    (it "removes multiple trailing non-test function names"
+      (expect (pytest--extract-test '("test_file.py" "TestGroup" "test_func" "func1" "func2"))
+              :to-equal '("test_file.py" "TestGroup" "test_func")))
+    (it "removes a single trailing non-test function name"
+      (expect (pytest--extract-test '("test_file.py" "TestGroup" "test_func" "func"))
+              :to-equal '("test_file.py" "TestGroup" "test_func")))
+    (it "does not remove test function names"
+      (expect (pytest--extract-test '("test_file.py" "test_func"))
+              :to-equal '("test_file.py" "test_func")))
+    (it "does not remove from a test group"
+      (expect (pytest--extract-test '("test_file.py" "TestGroup" "func"))
+              :to-equal '("test_file.py" "TestGroup" "func")))
+    (it "does not remove from top-level"
+      (expect (pytest--extract-test '("test_file.py" "func"))
+              :to-equal '("test_file.py" "func")))))
 
 ;; selector list manipulation
 (describe "manipulation of a list of selectors"

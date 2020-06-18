@@ -87,6 +87,13 @@ The format of each selector is typically:
 where nodeid is the identifier from python with '.' replaced by '::'."
   (mapcar 'pytest--normalize-selector selectors))
 
+(defun pytest--extract-test (selector)
+  "Remove functions until SELECTOR describes a test."
+  (while (and (not (pytest--test-name-p (car (last selector))))
+              (cl-some 'pytest--test-name-p (butlast selector)))
+    (setq selector (butlast selector)))
+  selector)
+
 (defun pytest--extract-group (selector)
   "Use the right-most test group in SELECTOR."
   (let* ((full-name (cdr selector))
