@@ -62,6 +62,10 @@
       (expect (pytest--test-p '("test_file.py" "test_function"))
               :to-be t))
 
+    (it "detects just the test file"
+      (expect (pytest--test-p '("test_file.py"))
+              :to-be t))
+
     (it "detects a group without tests"
       (expect (pytest--test-p '("test_file.py" "TestGroup"))
               :to-be t))
