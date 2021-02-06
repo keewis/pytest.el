@@ -1,7 +1,8 @@
 import warnings
-import pytest
 
 from example import example
+
+import pytest
 
 
 def warn():
