@@ -1,6 +1,7 @@
 import warnings
 
 import pytest
+
 from example import example
 
 
