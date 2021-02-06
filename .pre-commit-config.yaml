@@ -21,7 +21,3 @@ repos:
     rev: 3.8.4
     hooks:
       - id: flake8
-  - repo: https://github.com/eschulte/lisp-format
-    rev: 9c68e5ab81c01d1b97f072ee22c6ebf9eae9961b
-    hooks:
-      - id: lisp-format
