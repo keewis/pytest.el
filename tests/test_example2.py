@@ -1,4 +1,5 @@
 import unittest
+
 import pytest
 
 
@@ -7,7 +8,8 @@ def test_case():
 
 
 @pytest.mark.skipif(
-    False, reason="don't skip the whole group",
+    False,
+    reason="don't skip the whole group",
 )
 class TestGroup:
     def test_pass(self):
