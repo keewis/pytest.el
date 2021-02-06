@@ -17,6 +17,7 @@ jobs:
         with:
           fetch-depth: 2
       - uses: keewis/ci-trigger@v1
+        id: detect-trigger
         with:
           keyword: "[skip-ci]"
 
