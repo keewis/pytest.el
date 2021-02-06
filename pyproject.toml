@@ -1,0 +1,5 @@
+[tool.isort]
+profile = "black"
+multi_line_output = 3
+default_section = "THIRDPARTY"
+known_local_folder = "example"
