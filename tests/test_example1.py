@@ -1,3 +1,4 @@
+import sys
 import warnings
 
 import pytest
@@ -19,6 +20,11 @@ def test_pass():
     assert True
 
 
+def test_pass_with_output():
+    print("output")
+    print("error message", file=sys.stderr)
+
+
 def test_fail():
     warn()
     assert False
@@ -32,6 +38,11 @@ def test_error(failing):
 def test_xfail():
     warn()
 
+    assert False
+
+
+@pytest.mark.xfail(reason="xfail without a reason")
+def test_xfail_reason():
     assert False
 
 
