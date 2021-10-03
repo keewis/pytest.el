@@ -40,20 +40,21 @@
     map)
   "Keymap used in `pytest-raw-mode'.")
 
-(define-minor-mode pytest-raw-mode
-  "Minor mode for viewing raw pytest output.
+(define-derived-mode pytest-raw-mode special-mode "Pytest Raw"
+  "Major mode for viewing pytest raw output.
 
 \\{pytest-raw-mode-map}"
-  :lighter "PytestRaw"
   :group 'pytest-modes
   :keymap pytest-raw-mode-map
   (buffer-disable-undo)
+  (setq truncate-lines t)
+  (setq buffer-read-only t)
   (setq-local line-move-visual t)
   (setq-local font-lock-syntactic-face-function #'ignore)
   (setq show-trailing-whitespace nil)
-  (read-only-mode)
   (defvar quit-restore)
   (setq quit-restore "bury"))
+  ;(ansi-color-for-comint-mode-on))
 
 (defun pytest--run-raw (&optional args selectors dir buffer-name)
   "Run pytest in a raw buffer named BUFFER-NAME.
@@ -64,16 +65,15 @@ If DIR is non-nil, run pytest in it."
   (let ((selectors (pytest--normalize-selectors selectors))
         (args (append args (pytest--join-selectors selectors)))
         (output-buffer (pytest--buffer-by-name buffer-name))
+        (inhibit-read-only t)
         proc)
     (with-current-buffer output-buffer
       (erase-buffer)
-      (ansi-color-for-comint-mode-on)
-      (comint-mode)
       (pytest-raw-mode))
 
     (setq proc (pytest--run args dir output-buffer))
     (set-process-query-on-exit-flag proc nil)
-    (set-process-filter proc 'comint-output-filter)
+    ;(set-process-filter proc 'comint-output-filter)
 
     (with-current-buffer output-buffer
       (defvar called-selectors)
