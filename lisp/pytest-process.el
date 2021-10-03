@@ -22,6 +22,8 @@
 ;;; Code:
 
 (require 'projectile)
+(require 's)
+
 (require 'pytest-core)
 
 (defgroup pytest-process nil
