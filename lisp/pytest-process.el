@@ -40,12 +40,23 @@ to work in every virtual environment."
   "Construct the base command for pytest."
   (cons pytest-python-executable '("-m" "pytest")))
 
-(defun pytest--execute-async (command dir output-buffer)
-  "Execute COMMAND asynchronously in DIR and write to OUTPUT-BUFFER."
-  (let ((default-directory dir))
-    (unless (string-match "&[ \t]*\\'" command)
-      (setq command (concat command " &"))
-      (shell-command command output-buffer))))
+(defun pytest--execute (name command dir output-buffer)
+  "Execute COMMAND asynchronously in DIR.
+
+NAME is a name for the process.
+
+stdout is written to OUTPUT-BUFFER, which needs to be a buffer, not a string."
+  (let ((default-directory dir)
+        proc)
+    (with-current-buffer output-buffer
+      (ansi-color-for-comint-mode-on)
+      (comint-mode))
+    (setq proc (start-process-shell-command name
+                                            output-buffer
+                                            command))
+    (set-process-query-on-exit-flag proc nil)
+    (set-process-filter proc 'comint-output-filter)
+    proc))
 
 (defun pytest--construct-command (args)
   "Construct the pytest command using ARGS."
