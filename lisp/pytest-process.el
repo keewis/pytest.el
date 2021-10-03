@@ -74,9 +74,10 @@ If optional DIR is non-nil, pytest is run in that directory.
 Otherwise it is run in the project's root as defined by projectile or
 the current working directory.
 
-If optional OUTPUT-BUFFER is non-nil, write to the buffer with that name."
+If optional OUTPUT-BUFFER is non-nil, write to that buffer."
   (let ((command (pytest--construct-command args))
         (default-directory (or dir (projectile-project-root))))
-    (pytest--execute-async command default-directory output-buffer)))
+    (pytest--execute "pytest" command default-directory output-buffer)))
+
 (provide 'pytest-process)
 ;;; pytest-process.el ends here
