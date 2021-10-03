@@ -48,17 +48,8 @@ to work in every virtual environment."
 NAME is a name for the process.
 
 stdout is written to OUTPUT-BUFFER, which needs to be a buffer, not a string."
-  (let ((default-directory dir)
-        proc)
-    (with-current-buffer output-buffer
-      (ansi-color-for-comint-mode-on)
-      (comint-mode))
-    (setq proc (start-process-shell-command name
-                                            output-buffer
-                                            command))
-    (set-process-query-on-exit-flag proc nil)
-    (set-process-filter proc 'comint-output-filter)
-    proc))
+  (let ((default-directory dir))
+    (start-process-shell-command name output-buffer command)))
 
 (defun pytest--construct-command (args)
   "Construct the pytest command using ARGS."

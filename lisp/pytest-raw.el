@@ -27,6 +27,7 @@
 (require 'pytest-process)
 (require 'pytest-selectors)
 
+
 (defun pytest-bury-buffer ()
   "Kill or bury the currently active window."
   (interactive)
@@ -62,12 +63,21 @@ If ARGS is non-nil, pass them to pytest.
 If DIR is non-nil, run pytest in it."
   (let ((selectors (pytest--normalize-selectors selectors))
         (args (append args (pytest--join-selectors selectors)))
-        (output-buffer (pytest--buffer-by-name buffer-name)))
-    (pytest--run args dir output-buffer)
+        (output-buffer (pytest--buffer-by-name buffer-name))
+        proc)
+    (with-current-buffer output-buffer
+      (erase-buffer)
+      (ansi-color-for-comint-mode-on)
+      (comint-mode)
+      (pytest-raw-mode))
+
+    (setq proc (pytest--run args dir output-buffer))
+    (set-process-query-on-exit-flag proc nil)
+    (set-process-filter proc 'comint-output-filter)
+
     (with-current-buffer output-buffer
       (defvar called-selectors)
-      (setq-local called-selectors selectors)
-      (pytest-raw-mode))))
+      (setq-local called-selectors selectors))))
 
 (defun pytest-run-all ()
   "Run the whole test suite."
