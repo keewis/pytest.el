@@ -78,3 +78,9 @@ def test_nested():
         return func2()
 
     assert func() == 1
+
+
+def test_long_running():
+    import time
+
+    time.sleep(2)
