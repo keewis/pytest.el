@@ -122,6 +122,7 @@ If DIR is non-nil, run pytest in it."
 
     (setq proc (pytest--run args dir output-buffer))
     (set-process-query-on-exit-flag proc nil)
+    (set-process-filter proc 'pytest--process-filter)))
 
 (defun pytest-run-all ()
   "Run the whole test suite."
