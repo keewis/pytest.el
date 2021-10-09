@@ -67,6 +67,16 @@
   :group 'pytest-modes
   :type 'hook)
 
+(defun pytest--interpret-carriage-motion (buffer min-point max-point)
+  "Interpret the carriage motion characters in a region in BUFFER.
+
+That region is between MIN-POINT and MAX-POINT."
+  (with-current-buffer buffer
+    (comint-carriage-motion min-point max-point)))
+
+(add-hook 'pytest--process-filter-preprocessors 'ansi-color-apply)
+(add-hook 'pytest--process-filter-postprocessors 'pytest--interpret-carriage-motion)
+
 (defun pytest--run-process-filter-preprocessors (output)
   "Run the registered process filters on OUTPUT."
   (let ((funs pytest--process-filter-preprocessors) (result output))
@@ -103,6 +113,7 @@
             (set-marker (process-mark proc) (point)))
           (if moving (goto-char (process-mark proc))))
       (set-buffer old-buffer))))
+
 (defun pytest--run-raw (&optional args selectors dir buffer-name)
   "Run pytest in a raw buffer named BUFFER-NAME.
 
