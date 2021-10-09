@@ -22,6 +22,9 @@
 ;;; Code:
 
 (require 'projectile)
+(require 'f)
+(require 's)
+
 (require 'pytest-core)
 
 (defgroup pytest-process nil
@@ -36,16 +39,24 @@ to work in every virtual environment."
   :group 'pytest-process
   :type 'string)
 
+(defun pytest--python ()
+  "Find the python executable."
+  (if (f-absolute? pytest-python-executable)
+      pytest-python-executable
+    (executable-find pytest-python-executable)))
+
 (defun pytest--command ()
   "Construct the base command for pytest."
-  (cons pytest-python-executable '("-m" "pytest")))
+  (cons (pytest--python) '("-m" "pytest")))
 
-(defun pytest--execute-async (command dir output-buffer)
-  "Execute COMMAND asynchronously in DIR and write to OUTPUT-BUFFER."
+(defun pytest--execute (name command dir output-buffer)
+  "Execute COMMAND asynchronously in DIR.
+
+NAME is a name for the process.
+
+stdout is written to OUTPUT-BUFFER, which needs to be a buffer, not a string."
   (let ((default-directory dir))
-    (unless (string-match "&[ \t]*\\'" command)
-      (setq command (concat command " &"))
-      (shell-command command output-buffer))))
+    (start-process-shell-command name output-buffer command)))
 
 (defun pytest--construct-command (args)
   "Construct the pytest command using ARGS."
@@ -61,9 +72,10 @@ If optional DIR is non-nil, pytest is run in that directory.
 Otherwise it is run in the project's root as defined by projectile or
 the current working directory.
 
-If optional OUTPUT-BUFFER is non-nil, write to the buffer with that name."
+If optional OUTPUT-BUFFER is non-nil, write to that buffer."
   (let ((command (pytest--construct-command args))
         (default-directory (or dir (projectile-project-root))))
-    (pytest--execute-async command default-directory output-buffer)))
+    (pytest--execute "pytest" command default-directory output-buffer)))
+
 (provide 'pytest-process)
 ;;; pytest-process.el ends here

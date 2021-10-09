@@ -75,19 +75,19 @@
 
   (describe "a function to check if the current statement is a decorator (pytest-info--decorator-p)"
     (it "detects the first line of a decorator"
-      (expect (with-mark-at-line buffer1 11 (pytest-info--decorator-p)) :to-be t))
+      (expect (with-mark-at-line buffer1 12 (pytest-info--decorator-p)) :to-be t))
 
     (it "detects continuation lines of a decorator"
       (expect (with-mark-at-line buffer1 44 (pytest-info--decorator-p)) :to-be t))
 
     (it "detects the indented first line of a decorator"
-      (expect (with-mark-at-line buffer2 22 (pytest-info--decorator-p)) :to-be t))
+      (expect (with-mark-at-line buffer2 24 (pytest-info--decorator-p)) :to-be t))
 
     (it "detects indented continuation lines of a decorator"
-      (expect (with-mark-at-line buffer2 17 (pytest-info--decorator-p)) :to-be t))
+      (expect (with-mark-at-line buffer2 19 (pytest-info--decorator-p)) :to-be t))
 
     (it "does not detect function declarations"
-      (expect (with-mark-at-line buffer1 12 (pytest-info--decorator-p)) :to-be nil))
+      (expect (with-mark-at-line buffer1 13 (pytest-info--decorator-p)) :to-be nil))
 
     (it "does not detect normal statements"
       (expect (with-mark-at-line buffer1 23 (pytest-info--decorator-p)) :to-be nil)))
@@ -97,24 +97,24 @@
       (expect (with-mark-at-line buffer1 5 (pytest-info-current-pos))
               :to-equal nil))
     (it "detects a plain function"
-      (expect (with-mark-at-line buffer1 7 (pytest-info-current-pos))
+      (expect (with-mark-at-line buffer1 8 (pytest-info-current-pos))
               :to-equal (list filepath1 "warn"))
       (expect (with-mark-at-line buffer1 8 (pytest-info-current-pos))
               :to-equal (list filepath1 "warn")))
     (it "detects a function with a decorator"
-      (expect (with-mark-at-line buffer1 11 (pytest-info-current-pos))
+      (expect (with-mark-at-line buffer1 12 (pytest-info-current-pos))
               :to-equal (list filepath1 "failing"))
-      (expect (with-mark-at-line buffer1 43 (pytest-info-current-pos))
+      (expect (with-mark-at-line buffer1 44 (pytest-info-current-pos))
               :to-equal (list filepath1 "test_skip")))
     (it "detects a function with multiple decorators"
-      (expect (with-mark-at-line buffer1 61 (pytest-info-current-pos))
+      (expect (with-mark-at-line buffer1 62 (pytest-info-current-pos))
               :to-equal (list filepath1 "variable"))
-      (expect (with-mark-at-line buffer1 58 (pytest-info-current-pos))
+      (expect (with-mark-at-line buffer1 59 (pytest-info-current-pos))
               :to-equal (list filepath1 "variable"))
-      (expect (with-mark-at-line buffer1 51 (pytest-info-current-pos))
+      (expect (with-mark-at-line buffer1 52 (pytest-info-current-pos))
               :to-equal (list filepath1 "variable")))
     (it "detects a function from within the function's body"
-      (expect (with-mark-at-line buffer1 33 (pytest-info-current-pos))
+      (expect (with-mark-at-line buffer1 34 (pytest-info-current-pos))
               :to-equal (list filepath1 "test_xfail")))))
 
 
