@@ -24,14 +24,19 @@
 (require 'pytest-process)
 
 (describe "pytest commands"
-  (it "constructs the base command without args (pytest--command)"
-    (expect (pytest--command) :to-equal '("python" "-m" "pytest"))
+  (it "constructs the python command (pytest--python)"
+    (expect (pytest--python) :to-match "/python$")
     (let ((pytest-python-executable "/usr/bin/python"))
-      (expect (pytest--command) :to-equal '("/usr/bin/python" "-m" "pytest"))))
+      (expect (pytest--python) :to-equal "/usr/bin/python"))
+    (let ((pytest-python-executable "/usr/local/bin/python"))
+      (expect (pytest--python) :to-equal "/usr/local/bin/python")))
+
+  (it "constructs the base command without args (pytest--command)"
+    (expect (pytest--command) :to-equal (list (pytest--python) "-m" "pytest")))
 
   (it "constructs the command with args (pytest--construct-commands)"
     (expect (pytest--construct-command '("-v" "--color=yes"))
-            :to-equal "python -m pytest -v --color=yes")))
+            :to-match "python -m pytest -v --color=yes")))
 
 (provide 'test-process)
 ;;; test-process.el ends here
