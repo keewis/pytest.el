@@ -38,9 +38,13 @@ to work in every virtual environment."
   :group 'pytest-process
   :type 'string)
 
+(defun pytest--python ()
+  "Find the python executable."
+  (executable-find pytest-python-executable))
+
 (defun pytest--command ()
   "Construct the base command for pytest."
-  (cons (executable-find pytest-python-executable) '("-m" "pytest")))
+  (cons (pytest--python) '("-m" "pytest")))
 
 (defun pytest--execute (name command dir output-buffer)
   "Execute COMMAND asynchronously in DIR.
