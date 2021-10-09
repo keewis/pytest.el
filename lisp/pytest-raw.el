@@ -21,7 +21,9 @@
 
 ;;; Code:
 (require 'cl-lib)
+(require 'ansi-color)
 
+(require 'pytest-core)
 (require 'pytest-buffers)
 (require 'pytest-info)
 (require 'pytest-process)
@@ -54,8 +56,53 @@
   (setq show-trailing-whitespace nil)
   (defvar quit-restore)
   (setq quit-restore "bury"))
-  ;(ansi-color-for-comint-mode-on))
 
+(defcustom pytest--process-filter-preprocessors nil
+  "Hooks to run before inserting the output of pytest."
+  :group 'pytest-modes
+  :type 'hook)
+
+(defcustom pytest--process-filter-postprocessors nil
+  "Hooks to run after inserting the output of pytest."
+  :group 'pytest-modes
+  :type 'hook)
+
+(defun pytest--run-process-filter-preprocessors (output)
+  "Run the registered process filters on OUTPUT."
+  (let ((funs pytest--process-filter-preprocessors) (result output))
+    (while funs
+      (setq result (funcall (car funs) result))
+      (setq funs (cdr funs)))
+    result))
+
+(defun pytest--run-process-filter-postprocessors (buffer min-point max-point)
+  "Run the registered process filters on BUFFER between MIN-POINT and MAX-POINT."
+  (let ((funs pytest--process-filter-postprocessors))
+    (while funs
+      (funcall (car funs) buffer min-point max-point)
+      (setq funs (cdr funs)))))
+
+(defun pytest--process-filter (proc output)
+  "Filter for handling the stdout of PROC, which is in OUTPUT."
+  (let ((old-buffer (current-buffer)))
+    (display-buffer (process-buffer proc))
+    (unwind-protect
+        (let (moving (inhibit-read-only t))
+          (set-buffer (process-buffer proc))
+          (setq moving (= (point) (process-mark proc)))
+          (save-excursion
+            ;; call filters that work just on the text
+            (setq output (pytest--run-process-filter-preprocessors output))
+            ;; Insert the text, moving the process-marker.
+            (goto-char (process-mark proc))
+            (insert (pytest--run-process-filter-preprocessors output))
+            ;; call filters that need to work on a buffer
+            (pytest--run-process-filter-postprocessors (process-buffer proc)
+                                                       (process-mark proc)
+                                                       (point))
+            (set-marker (process-mark proc) (point)))
+          (if moving (goto-char (process-mark proc))))
+      (set-buffer old-buffer))))
 (defun pytest--run-raw (&optional args selectors dir buffer-name)
   "Run pytest in a raw buffer named BUFFER-NAME.
 
