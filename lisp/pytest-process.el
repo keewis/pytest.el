@@ -40,7 +40,7 @@ to work in every virtual environment."
 
 (defun pytest--command ()
   "Construct the base command for pytest."
-  (cons pytest-python-executable '("-m" "pytest")))
+  (cons (executable-find pytest-python-executable) '("-m" "pytest")))
 
 (defun pytest--execute (name command dir output-buffer)
   "Execute COMMAND asynchronously in DIR.
