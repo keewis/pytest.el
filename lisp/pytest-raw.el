@@ -126,14 +126,15 @@ If DIR is non-nil, run pytest in it."
         proc)
     (with-current-buffer output-buffer
       (let ((inhibit-read-only t))
-        (erase-buffer)
-        (defvar called-selectors)
-        (setq-local called-selectors selectors))
+        (erase-buffer))
       (pytest-raw-mode))
 
     (setq proc (pytest--run args dir output-buffer))
     (set-process-query-on-exit-flag proc nil)
-    (set-process-filter proc 'pytest--process-filter)))
+    (set-process-filter proc 'pytest--process-filter)
+    (with-current-buffer output-buffer
+      (defvar called-selectors)
+      (setq-local called-selectors selectors))))
 
 (defun pytest-run-all ()
   "Run the whole test suite."
