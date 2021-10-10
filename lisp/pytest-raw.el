@@ -21,11 +21,14 @@
 
 ;;; Code:
 (require 'cl-lib)
+(require 'ansi-color)
 
+(require 'pytest-core)
 (require 'pytest-buffers)
 (require 'pytest-info)
 (require 'pytest-process)
 (require 'pytest-selectors)
+
 
 (defun pytest-bury-buffer ()
   "Kill or bury the currently active window."
@@ -39,20 +42,77 @@
     map)
   "Keymap used in `pytest-raw-mode'.")
 
-(define-minor-mode pytest-raw-mode
-  "Minor mode for viewing raw pytest output.
+(define-derived-mode pytest-raw-mode special-mode "Pytest Raw"
+  "Major mode for viewing pytest raw output.
 
 \\{pytest-raw-mode-map}"
-  :lighter "PytestRaw"
   :group 'pytest-modes
   :keymap pytest-raw-mode-map
   (buffer-disable-undo)
+  (setq truncate-lines t)
+  (setq buffer-read-only t)
   (setq-local line-move-visual t)
   (setq-local font-lock-syntactic-face-function #'ignore)
   (setq show-trailing-whitespace nil)
-  (read-only-mode)
   (defvar quit-restore)
   (setq quit-restore "bury"))
+
+(defcustom pytest--process-filter-preprocessors nil
+  "Hooks to run before inserting the output of pytest."
+  :group 'pytest-modes
+  :type 'hook)
+
+(defcustom pytest--process-filter-postprocessors nil
+  "Hooks to run after inserting the output of pytest."
+  :group 'pytest-modes
+  :type 'hook)
+
+(defun pytest--interpret-carriage-motion (buffer min-point max-point)
+  "Interpret the carriage motion characters in a region in BUFFER.
+
+That region is between MIN-POINT and MAX-POINT."
+  (with-current-buffer buffer
+    (comint-carriage-motion min-point max-point)))
+
+(add-hook 'pytest--process-filter-preprocessors 'ansi-color-apply)
+(add-hook 'pytest--process-filter-postprocessors 'pytest--interpret-carriage-motion)
+
+(defun pytest--run-process-filter-preprocessors (output)
+  "Run the registered process filters on OUTPUT."
+  (let ((funs pytest--process-filter-preprocessors) (result output))
+    (while funs
+      (setq result (funcall (car funs) result))
+      (setq funs (cdr funs)))
+    result))
+
+(defun pytest--run-process-filter-postprocessors (buffer min-point max-point)
+  "Run the registered process filters on BUFFER between MIN-POINT and MAX-POINT."
+  (let ((funs pytest--process-filter-postprocessors))
+    (while funs
+      (funcall (car funs) buffer min-point max-point)
+      (setq funs (cdr funs)))))
+
+(defun pytest--process-filter (proc output)
+  "Filter for handling the stdout of PROC, which is in OUTPUT."
+  (let ((old-buffer (current-buffer)))
+    (display-buffer (process-buffer proc))
+    (unwind-protect
+        (let (moving (inhibit-read-only t))
+          (set-buffer (process-buffer proc))
+          (setq moving (= (point) (process-mark proc)))
+          (save-excursion
+            ;; call filters that work just on the text
+            (setq output (pytest--run-process-filter-preprocessors output))
+            ;; Insert the text, moving the process-marker.
+            (goto-char (process-mark proc))
+            (insert (pytest--run-process-filter-preprocessors output))
+            ;; call filters that need to work on a buffer
+            (pytest--run-process-filter-postprocessors (process-buffer proc)
+                                                       (process-mark proc)
+                                                       (point))
+            (set-marker (process-mark proc) (point)))
+          (if moving (goto-char (process-mark proc))))
+      (set-buffer old-buffer))))
 
 (defun pytest--run-raw (&optional args selectors dir buffer-name)
   "Run pytest in a raw buffer named BUFFER-NAME.
@@ -62,12 +122,19 @@ If ARGS is non-nil, pass them to pytest.
 If DIR is non-nil, run pytest in it."
   (let ((selectors (pytest--normalize-selectors selectors))
         (args (append args (pytest--join-selectors selectors)))
-        (output-buffer (pytest--buffer-by-name buffer-name)))
-    (pytest--run args dir output-buffer)
+        (output-buffer (pytest--buffer-by-name buffer-name))
+        proc)
+    (with-current-buffer output-buffer
+      (let ((inhibit-read-only t))
+        (erase-buffer))
+      (pytest-raw-mode))
+
+    (setq proc (pytest--run args dir output-buffer))
+    (set-process-query-on-exit-flag proc nil)
+    (set-process-filter proc 'pytest--process-filter)
     (with-current-buffer output-buffer
       (defvar called-selectors)
-      (setq-local called-selectors selectors)
-      (pytest-raw-mode))))
+      (setq-local called-selectors selectors))))
 
 (defun pytest-run-all ()
   "Run the whole test suite."
