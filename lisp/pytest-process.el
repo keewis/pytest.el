@@ -49,21 +49,27 @@ to work in every virtual environment."
   "Construct the base command for pytest."
   (cons (pytest--python) '("-m" "pytest")))
 
-(defun pytest--execute (name command dir output-buffer)
+(defun pytest--execute (name command dir output-buffer &optional error-buffer)
   "Execute COMMAND asynchronously in DIR.
 
 NAME is a name for the process.
 
-stdout is written to OUTPUT-BUFFER, which needs to be a buffer, not a string."
+stdout is written to OUTPUT-BUFFER, which needs to be a buffer, not a string.
+stderr is written to ERROR-BUFFER, which also needs to be a buffer."
   (let ((default-directory dir))
-    (start-process-shell-command name output-buffer command)))
+    (make-process
+     :name name
+     :buffer output-buffer
+     :stderr error-buffer
+     :connection-type 'pipe
+     :command command)))
 
 (defun pytest--construct-command (args)
   "Construct the pytest command using ARGS."
   (let ((command (append (pytest--command) args)))
     (s-join " " command)))
 
-(defun pytest--run (&optional args dir output-buffer)
+(defun pytest--run (&optional args dir output-buffer error-buffer)
   "Run pytest with ARGS (if any) in the given DIR and write to OUTPUT-BUFFER.
 
 If optional ARGS is non-nil, these are passed to pytest.
@@ -72,10 +78,11 @@ If optional DIR is non-nil, pytest is run in that directory.
 Otherwise it is run in the project's root as defined by projectile or
 the current working directory.
 
-If optional OUTPUT-BUFFER is non-nil, write to that buffer."
+If optional OUTPUT-BUFFER is non-nil, write stderr to that buffer.
+If optional ERROR-BUFFER is non-nil, write stderr to that buffer."
   (let ((command (pytest--construct-command args))
         (default-directory (or dir (projectile-project-root))))
-    (pytest--execute "pytest" command default-directory output-buffer)))
+    (pytest--execute "pytest" command default-directory output-buffer error-buffer)))
 
 (provide 'pytest-process)
 ;;; pytest-process.el ends here
