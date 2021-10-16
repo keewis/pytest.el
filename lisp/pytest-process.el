@@ -22,7 +22,6 @@
 ;;; Code:
 
 (require 'projectile)
-(require 'f)
 (require 's)
 
 (require 'pytest-core)
@@ -41,7 +40,7 @@ to work in every virtual environment."
 
 (defun pytest--python ()
   "Find the python executable."
-  (if (f-absolute? pytest-python-executable)
+  (if (file-name-absolute-p pytest-python-executable)
       pytest-python-executable
     (executable-find pytest-python-executable)))
 
